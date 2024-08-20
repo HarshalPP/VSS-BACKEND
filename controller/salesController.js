@@ -270,7 +270,7 @@ exports.create = async (req, res) => {
             secretAccessKey: process.env. SECRET_ACCESS_KEY,
           });
           
-        const bucketName = 'orderssssss';
+        const bucketName = 'orderpdfnew';
 
         const uploadParams = {
             Bucket: bucketName,
@@ -544,7 +544,7 @@ exports.get = async(req, res) => {
                     accessKeyId: process.env.ACCESS_KEY_ID ,
             secretAccessKey: process.env. SECRET_ACCESS_KEY,
                   });
-                const bucketName = 'orderssssss';
+                const bucketName = 'orderpdfnew';
                 const uploadParams = {
                     Bucket: bucketName,
                     Key: `${updatesalesOrder.orderId}.pdf`,
