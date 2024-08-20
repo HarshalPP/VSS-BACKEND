@@ -166,7 +166,7 @@ exports.create = async (req, res) => {
 
         const browser = await puppeteer.launch({
             headless: 'new', 
-            args: ['--no-sandbox'],// Set to true if you want to run in headless mode
+            args: ['--no-sandbox','--disable-setuid-sandbox'],// Set to true if you want to run in headless mode
             
         });
 
