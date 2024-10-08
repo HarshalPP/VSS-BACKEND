@@ -759,12 +759,7 @@ exports.delete = async(req, res) => {
                     // Find the matching product in AddStock
                     const stockInfo = await AddStock.findOne({
                         product: product.select_product,
-                        company: product.company,
-                        grade: product.grade, // Ensure grade matches
-                        topcolor: product.topcolor,
-                        coating: product.coating,
-                        temper: product.temper,
-                        guardfilm: product.guardfilm
+                        company: product.company
                     });
     
                     // If stock information is found, attach the batch_number to the product
