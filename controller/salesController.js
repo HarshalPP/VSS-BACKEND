@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const moment = require('moment');
 // const {redisClient,isRedisConnected} = require('../config/redis')
 var stock = require('../models/Stock_M');
+const AddStock = require("../models/Stock_M");
 const { all } = require("../routes/sales");
 const redisClient = require('../config/redis');
 const fs = require('fs').promises;
@@ -166,7 +167,7 @@ exports.create = async (req, res) => {
 
         const browser = await puppeteer.launch({
             headless: 'new', 
-            args: ['--no-sandbox'],// Set to true if you want to run in headless mode
+            args: ['--no-sandbox'],// Set to true if you want to run iya n headless mode
             
         });
 
@@ -693,32 +694,109 @@ exports.delete = async(req, res) => {
     }
 
  
+    // exports.allRecords = async (req, res) => {
+    //     try {
+    //         const resPerPage = 10; // results per page
+    //         const page = req.params.page || 1; // Page 
+    //         const orderList = await salesorder.find().select({ pdf_order: false })
+    //               // Remove pdf_order from the newOrder object
+    //             .sort({ '_id': -1 })
+    //             .populate({
+    //                 path: 'productionincharge',
+    //                 select: '_id UserName' // Specify the fields you want to include from the 'productionincharge' collection
+    //             }).populate({
+    //                 path:'db_id',
+    //                 select:'_id UserName'
+    //             }).populate({
+    //                 path:'products.productId',
+    //                 select:'batch_number'
+    //             })
+    //             .skip((resPerPage * page) - resPerPage)
+    //             .limit(resPerPage);
+
+    //       let ProductObject = orderList.forEach(item => {
+    //         console.log(item.products, "Products for Order ID:", item._id);
+          
+
+    //        });
+
+        
+        
+
+
+    //             //  for(let Products of orderList.)
+    
+    //         res.json({ "status": 200, "msg": 'data has been fetched', res: orderList });
+    //     } catch (err) {
+    //         res.status(500).json({ message: err.message });
+    //     }
+    // };
+    
     exports.allRecords = async (req, res) => {
         try {
-            const resPerPage = 10; // results per page
-            const page = req.params.page || 1; // Page 
-            const orderList = await salesorder.find().select({ pdf_order: false })
-                  // Remove pdf_order from the newOrder object
-                .sort({ '_id': -1 })
+            const resPerPage = 10; // Results per page
+            const page = req.params.page || 1; // Page number
+    
+            let orderList = await salesorder.find()
+                .select({ pdf_order: false }) // Exclude the pdf_order field
+                .sort({ '_id': -1 }) // Sort by latest order first
                 .populate({
                     path: 'productionincharge',
-                    select: '_id UserName' // Specify the fields you want to include from the 'productionincharge' collection
-                }).populate({
-                    path:'db_id',
-                    select:'_id UserName'
-                }).populate({
-                    path:'products.productId',
-                    select:'batch_number'
+                    select: '_id UserName' // Populate productionincharge fields
+                })
+                .populate({
+                    path: 'db_id',
+                    select: '_id UserName' // Populate db_id fields
                 })
                 .skip((resPerPage * page) - resPerPage)
                 .limit(resPerPage);
-            
     
-            res.json({ "status": 200, "msg": 'data has been fetched', res: orderList });
+            // Iterate over each order and its products to fetch batch numbers
+            for (let order of orderList) {
+                let batchNumbers = []; // Initialize an array to hold batch numbers for the order
+    
+                for (let product of order.products) {
+                    // Find the matching product in AddStock
+                    const stockInfo = await AddStock.findOne({
+                        product: product.select_product,
+                        company: product.company,
+                        grade: product.grade, // Ensure grade matches
+                        topcolor: product.topcolor,
+                        coating: product.coating,
+                        temper: product.temper,
+                        guardfilm: product.guardfilm
+                    });
+    
+                    // If stock information is found, attach the batch_number to the product
+                    if (stockInfo) {
+                        product.Batch_Number = stockInfo.batch_number; // Assign the batch_number from stockInfo
+                        batchNumbers.push(stockInfo.batch_number[0]); // Store the first batch_number
+                    } else {
+                        product.Batch_Number = 'No batch found'; // Default if no matching stock is found
+                    }
+                }
+    
+                // Update the salesorder with the new batch numbers
+                if (batchNumbers.length > 0) {
+                    order.Batch_Number = batchNumbers; // Assign batch numbers to the order
+                    await order.save(); // Save the updated order
+                }
+            }
+    
+            // Convert to plain objects to include the updated products
+            const responseList = orderList.map(order => order.toObject());
+    
+            // Send the updated order list with batch details
+            res.json({ status: 200, msg: 'Data has been fetched', res: responseList });
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
     };
     
-
+    
+    
+    
+    
+    
+    
 

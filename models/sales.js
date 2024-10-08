@@ -198,6 +198,11 @@ const saleSchema = new Schema({
         type: String//,
       //  required: true
       }
+    }],
+
+    Batch_Number:[{
+      type:String,
+      
     }]
   }],
 
