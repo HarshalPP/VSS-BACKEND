@@ -221,16 +221,15 @@ exports.showOrderDetails = async (req, res) => {
       select: 'id UserName'
     });
 
+    console.log(newOrderDetails)
+
 
     // Filter orders with 'Accepted' status and production incharge matches Finddata
     const acceptedOrders = newOrderDetails.filter(order =>
       order.orderstatus === 'Accepted' &&
-      order.productionincharge.length > 0 && // Ensure productionincharge array is not empty
-      order.productionincharge[0].UserName === Finddata
+      order.productionincharge.length > 0
     );
 
-
-    console.log("Accepted orders with the provided production incharge:", acceptedOrders);
 
     // Check if any orders are found for the provided production incharge
     if (acceptedOrders.length > 0) {
