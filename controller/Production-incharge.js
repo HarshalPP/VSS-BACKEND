@@ -80,7 +80,6 @@ exports.editStocks = async (req, res) => {
         { $set: { weight: remainingWeight } },
         { new: true }
       );
-
       console.log("new updated data", updatedData)
 
       // Create a new batch_number
@@ -213,7 +212,9 @@ exports.showOrderDetails = async (req, res) => {
   try {
     const Finddata = req.query.productionincharge;
 
-    const newOrderDetails = await OrderDetails.find({}).select({ pdf_order: false }).populate({
+    const newOrderDetails = await OrderDetails.find({})
+    .select({ pdf_order: false })
+    .populate({
       path: 'productionincharge',
       select: '_id UserName'
     }).populate({
@@ -231,7 +232,8 @@ exports.showOrderDetails = async (req, res) => {
     );
 
 
-    // Check if any orders are found for the provided production incharge
+    // Check if any orders are found for the provided production incharge //
+
     if (acceptedOrders.length > 0) {
       res.status(200).json({
         orderDetails: acceptedOrders,

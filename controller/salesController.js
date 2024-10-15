@@ -384,13 +384,13 @@ exports.availableStock = async (req, res) => {
         console.log("Filtered data:", filteredData);
 
         if (filteredData.length === 0) {
-            res.status(400).json({ isAvailable: 'False', status: 400, message: "Out Of Stock" });
+            return res.status(400).json({ isAvailable: 'False', status: 400, message: "Out Of Stock" });
         } else {
-            res.status(200).json({ isAvailable: 'True', status: 200, message: "Stock Available", filteredData });
+            return res.status(200).json({ isAvailable: 'True', status: 200, message: "Stock Available", filteredData });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ status: 500, message: "Something Went Wrong" });
+        return res.status(500).json({ status: 500, message: "Something Went Wrong" });
     }
 };
 
