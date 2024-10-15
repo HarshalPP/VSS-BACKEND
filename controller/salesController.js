@@ -91,6 +91,7 @@ exports.create = async (req, res) => {
 
         // Create a new sales order instance
         const orderId = result;  // Store the generated order ID in a variable
+        console.log("orderId is " , orderId)
         const pdfDirectory = path.join(__dirname, 'order');  // Specify the directory where you want to save the PDF files
         const pdfPath = path.join(pdfDirectory, `${orderId}.pdf`);  // Specify the path for the PDF file
         console.log(pdfPath)
@@ -142,6 +143,11 @@ exports.create = async (req, res) => {
             const temper = product.temper;
             const guardfilm = product.guardfilm;
             const weight = product.weight;
+            const thickness =  product.thickness;
+            const width = product.width;
+            const length = product.length;
+            const pcs = product.pcs;
+            const rate=product.rate;
 
             const stock_data = await stock.findOne({
                 product: product_name,
@@ -174,86 +180,268 @@ exports.create = async (req, res) => {
         const page = await browser.newPage();
 
         // Assuming 'orderDetailsHTML' is a variable containing your HTML content
-        const orderDetailsHTML = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                body {
-                    font-family: 'Arial', sans-serif;
-                    margin: 20px;
-                    background-color: #f4f4f4;
-                    color: #333;
-                }
+    //     const orderDetailsHTML = `
+    //     <!DOCTYPE html>
+    //     <html lang="en">
+    //     <head>
+    //         <meta charset="UTF-8">
+    //         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    //         <style>
+    //             body {
+    //                 font-family: 'Arial', sans-serif;
+    //                 margin: 20px;
+    //                 background-color: #f4f4f4;
+    //                 color: #333;
+    //             }
         
-                h1, h2 {
-                    color: black;
-                    text-align:center
-                    font-size:17px
-                }
+    //             h1, h2 {
+    //                 color: black;
+    //                 text-align:center
+    //                 font-size:17px
+    //             }
         
-                p {
-                    margin-bottom: 10px;
-                }
+    //             p {
+    //                 margin-bottom: 10px;
+    //             }
         
-                ul {
-                    list-style: none;
-                    padding: 0;
-                }
+    //             ul {
+    //                 list-style: none;
+    //                 padding: 0;
+    //             }
         
-                li {
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                    margin-bottom: 15px;
-                    padding: 15px;
-                    background-color: #fff;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                    line-height:35px
-                }
+    //             li {
+    //                 border: 1px solid #ddd;
+    //                 border-radius: 5px;
+    //                 margin-bottom: 15px;
+    //                 padding: 15px;
+    //                 background-color: #fff;
+    //                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    //                 line-height:35px
+    //             }
         
-                strong {
-                    color: #007bff;
-                }
-            </style>
-            <title>Order Details</title>
-        </head>
-        <body>
-            <h1>Order Details</h1>
-            <p><strong>Order ID:</strong> ${orderId}</p>
-            <p><strong>Client Name:</strong> ${req.body.clientName}</p>
-            <p><strong>First Name:</strong> ${req.body.firmName}</p>
-            <p><strong>Address:</strong> ${req.body.address}</p>
-            <p><strong>City:</strong> ${req.body.city}</p>
-            <p><strong>Phone Number:</strong> ${req.body.phone_no}</p>
-            <p><strong>Email:</strong>${req.body.Email}
-            <p><strong>Order Status:</strong> ${req.body.orderstatus !== undefined ? req.body.orderstatus : 'Pending'}</p>
-            <p><strong>Order_mark:</strong> ${req.body.order_mark !== undefined ? req.body.order_mark : 'Pending'}</p>
-            <p><strong>Sales ID:</strong> ${req.body.sales_id}</p>
-            <p><strong>Total Weight:</strong>${req.body.dpTotalWeight}</p>
-            <p><strong>PhoneNumber:</strong>${req.body.dpPhone}</p>
+    //             strong {
+    //                 color: #007bff;
+    //             }
+    //         </style>
+    //         <title>Order Details</title>
+    //     </head>
+    //     <body>
+    //         <h1>Order Details</h1>
+    //         <p><strong>Order ID:</strong> ${orderId}</p>
+    //         <p><strong>Client Name:</strong> ${req.body.clientName}</p>
+    //         <p><strong>First Name:</strong> ${req.body.firmName}</p>
+    //         <p><strong>Address:</strong> ${req.body.address}</p>
+    //         <p><strong>City:</strong> ${req.body.city}</p>
+    //         <p><strong>Phone Number:</strong> ${req.body.phone_no}</p>
+    //         <p><strong>Email:</strong>${req.body.Email}
+    //         <p><strong>Order Status:</strong> ${req.body.orderstatus !== undefined ? req.body.orderstatus : 'Pending'}</p>
+    //         <p><strong>Order_mark:</strong> ${req.body.order_mark !== undefined ? req.body.order_mark : 'Pending'}</p>
+    //         <p><strong>Sales ID:</strong> ${req.body.sales_id}</p>
+    //         <p><strong>Total Weight:</strong>${req.body.dpTotalWeight}</p>
+    //         <p><strong>PhoneNumber:</strong>${req.body.dpPhone}</p>
         
-            <h2>Product Details</h2>
-            <ul>
-                ${req.body.products.map(product => `
-                    <li>
-                        <strong>Product Name:</strong> ${product.select_product}<br>
-                        <strong>Company:</strong> ${product.company}<br>
-                        <strong>Grade:</strong> ${product.grade}<br>
-                        <strong>Top Color:</strong> ${product.topcolor}<br>
-                        <strong>Coating:</strong> ${product.coating}<br>
-                        <strong>Temper:</strong> ${product.temper}<br>
-                        <strong>Guard Film:</strong> ${product.guardfilm}<br>
-                        <strong>Weight:</strong> ${product.weight}<br>
+    //         <h2>Product Details</h2>
+    //         <ul>
+    //             ${req.body.products.map(product => `
+    //                 <li>
+    //                     <strong>Product Name:</strong> ${product.select_product}<br>
+    //                     <strong>Company:</strong> ${product.company}<br>
+    //                     <strong>Grade:</strong> ${product.grade}<br>
+    //                     <strong>Top Color:</strong> ${product.topcolor}<br>
+    //                     <strong>Coating:</strong> ${product.coating}<br>
+    //                     <strong>Temper:</strong> ${product.temper}<br>
+    //                     <strong>Guard Film:</strong> ${product.guardfilm}<br>
+    //                     <strong>Weight:</strong> ${product.weight}<br>
 
-                    </li>
-                `).join('')}
-            </ul>
-        </body>
-        </html>
+    //                 </li>
+    //             `).join('')}
+    //         </ul>
+    //     </body>
+    //     </html>
         
-    `;
+    // `;
+
+    const orderDetailsHTML = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              clifford: "#DA373D",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .form {
+        width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        justify-content: space-evenly;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .header label {
+        /* margin-right: 10px; */
+      }
+      .header input {
+        width: 150px;
+        height: 30px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .table {
+        margin-bottom: 20px;
+        width: 100%;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+      }
+      th {
+        background-color: #F0F0F0;
+      }
+      .footer {
+        display: flex;
+        flex-direction: column;
+        justify-content: end;
+        align-items: end;
+        margin-top: 20px;
+      }
+      .Text {
+        border: none; /* Removes the border */
+        border-bottom: 1px solid black; /* Adds an underline */
+        width: 150px;
+        height: 30px;
+        padding: 10px;
+        outline: none; /* Removes the focus outline */
+      }
+      .parent-footer {
+        display: flex;
+        justify-content: space-between;
+      }
+      .footer label {
+        margin-right: 10px;
+      }
+      .footer input {
+        width: 150px;
+        height: 30px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .para1{
+        width: 40%;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form">
+      <div class="header flex flex-row justify-between">
+        <div>DC No.: ${req.body.dpPhone}</div>
+        <div class="flex flex-row items-center">
+          <div>Date: ${req.body.deliveryDate}</div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <div>
+          M/S: ${req.body.ms}
+          <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
+        </div>
+        <div>
+          Broker: ${req.body.broker}
+          <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
+        </div>
+        <div>
+          Vehicle No.: ${req.body.vehicleNum }
+          <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
+        </div>
+        <div>
+          Transport: ${req.body.transport}
+          <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
+        </div>
+      </div>
+      <div class="table">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Thickness</th>
+              <th>Width</th>
+              <th>Length</th>
+              <th>Weight</th>
+              <th>Pcs</th>
+              <th>Rate</th>
+              <th>Product</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${req.body.products.map((product, index) => `
+            <tr>
+              <td>${index + 1}</td>
+              <td>${product.thickness}</td>
+              <td>${product.width}</td>
+              <td>${product.length}</td>
+              <td>${product.weight}</td>
+              <td>${product.pcs}</td>
+              <td>${product.rate}</td>
+              <td>${product.select_product}</td>
+            </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="parent-footer">
+        <div class="para1 mb-4 ">
+          <p>
+            हमारे यहाँ से माल रुकवा एवं प्रीति प्रेषण किया गया है। ट्रक में
+            पर्ची लगने के उपरांत कर्ता की खपत होने की जवाबदारी हमारी नहीं होगी।
+          </p>
+        </div>
+        <div class="footer">
+          <div class="font-bold">
+            Received by: ${req.body.Received_by}
+            <div class="w-50 mb-4 ml-20"></div>
+          </div>
+          <div>
+            Name: ${req.body.clientName}
+            <div class="border-b-2 border-black-900 w-50 mb-4 ml-20"></div>
+          </div>
+          <div>
+            Mob. ${req.body.phone_no}
+            <div class="border-b-2 border-black-900 w-50 mb-4 ml-20"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+`;
 
 
         
