@@ -159,7 +159,7 @@ exports.create = async (req, res) => {
                 guardfilm: guardfilm
             });
 
-            
+
 
             if (stock_data && stock_data.weight >= weight) {
 
@@ -390,7 +390,6 @@ exports.create = async (req, res) => {
        await s3.upload(uploadParams).promise();
         const params = {
             Bucket: bucketName,
-            Expires: 2592000,  // 30 days = 2592000 seconds
             Key: `${orderId}.pdf`
         };
 
