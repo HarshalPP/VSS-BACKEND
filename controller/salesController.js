@@ -179,88 +179,6 @@ exports.create = async (req, res) => {
 
         const page = await browser.newPage();
 
-        // Assuming 'orderDetailsHTML' is a variable containing your HTML content
-    //     const orderDetailsHTML = `
-    //     <!DOCTYPE html>
-    //     <html lang="en">
-    //     <head>
-    //         <meta charset="UTF-8">
-    //         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    //         <style>
-    //             body {
-    //                 font-family: 'Arial', sans-serif;
-    //                 margin: 20px;
-    //                 background-color: #f4f4f4;
-    //                 color: #333;
-    //             }
-        
-    //             h1, h2 {
-    //                 color: black;
-    //                 text-align:center
-    //                 font-size:17px
-    //             }
-        
-    //             p {
-    //                 margin-bottom: 10px;
-    //             }
-        
-    //             ul {
-    //                 list-style: none;
-    //                 padding: 0;
-    //             }
-        
-    //             li {
-    //                 border: 1px solid #ddd;
-    //                 border-radius: 5px;
-    //                 margin-bottom: 15px;
-    //                 padding: 15px;
-    //                 background-color: #fff;
-    //                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    //                 line-height:35px
-    //             }
-        
-    //             strong {
-    //                 color: #007bff;
-    //             }
-    //         </style>
-    //         <title>Order Details</title>
-    //     </head>
-    //     <body>
-    //         <h1>Order Details</h1>
-    //         <p><strong>Order ID:</strong> ${orderId}</p>
-    //         <p><strong>Client Name:</strong> ${req.body.clientName}</p>
-    //         <p><strong>First Name:</strong> ${req.body.firmName}</p>
-    //         <p><strong>Address:</strong> ${req.body.address}</p>
-    //         <p><strong>City:</strong> ${req.body.city}</p>
-    //         <p><strong>Phone Number:</strong> ${req.body.phone_no}</p>
-    //         <p><strong>Email:</strong>${req.body.Email}
-    //         <p><strong>Order Status:</strong> ${req.body.orderstatus !== undefined ? req.body.orderstatus : 'Pending'}</p>
-    //         <p><strong>Order_mark:</strong> ${req.body.order_mark !== undefined ? req.body.order_mark : 'Pending'}</p>
-    //         <p><strong>Sales ID:</strong> ${req.body.sales_id}</p>
-    //         <p><strong>Total Weight:</strong>${req.body.dpTotalWeight}</p>
-    //         <p><strong>PhoneNumber:</strong>${req.body.dpPhone}</p>
-        
-    //         <h2>Product Details</h2>
-    //         <ul>
-    //             ${req.body.products.map(product => `
-    //                 <li>
-    //                     <strong>Product Name:</strong> ${product.select_product}<br>
-    //                     <strong>Company:</strong> ${product.company}<br>
-    //                     <strong>Grade:</strong> ${product.grade}<br>
-    //                     <strong>Top Color:</strong> ${product.topcolor}<br>
-    //                     <strong>Coating:</strong> ${product.coating}<br>
-    //                     <strong>Temper:</strong> ${product.temper}<br>
-    //                     <strong>Guard Film:</strong> ${product.guardfilm}<br>
-    //                     <strong>Weight:</strong> ${product.weight}<br>
-
-    //                 </li>
-    //             `).join('')}
-    //         </ul>
-    //     </body>
-    //     </html>
-        
-    // `;
-
     const orderDetailsHTML = `
 <!DOCTYPE html>
 <html lang="en">
@@ -471,6 +389,7 @@ exports.create = async (req, res) => {
        await s3.upload(uploadParams).promise();
         const params = {
             Bucket: bucketName,
+            Expires: 2592000,  // 30 days = 2592000 seconds
             Key: `${orderId}.pdf`
         };
 

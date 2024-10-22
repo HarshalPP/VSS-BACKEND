@@ -139,6 +139,7 @@ exports.Showorderdetails = async (req, res) => {
 
 exports.RecivedOrder = async (req, res) => {
   try {
+
     const orderId = req.query.orderId;
 
     const TotalWeight = req.query.dpTotalWeight
@@ -146,6 +147,7 @@ exports.RecivedOrder = async (req, res) => {
     let current_date = req.query.dpDate || moment().format('YYYY-MM-DD HH:mm:ss');
 
     const dpRecieved = req.query.dpRecieved;
+
 
     // Check if the order is marked as 'Complete'
     const order = await SalesManager.findOne({ orderId, Order_mark: 'Complete', TotalWeight, dpRecieved, current_date });
@@ -165,7 +167,9 @@ exports.RecivedOrder = async (req, res) => {
       message: 'Order received successfully',
       updateOrder,
     });
-  } catch (error) {
+  } 
+  
+  catch (error) {
     console.error('Error:', error);
     res.status(500).json({
       message: 'Internal Server Error',
