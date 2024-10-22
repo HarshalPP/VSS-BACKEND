@@ -158,7 +158,8 @@ exports.create = async (req, res) => {
                 temper: temper,
                 guardfilm: guardfilm
             });
-            console.log(stock_data.weight)
+
+            
 
             if (stock_data && stock_data.weight >= weight) {
 
@@ -433,11 +434,9 @@ return res.status(201).json({
     newOrder,
 });
 
-        return res.status(201).json({ "status": 201, "msg": 'Order successfully created', newOrder });
-
     } catch (err) {
         console.log(err);
-        res.status(400).json({ "status": 400, "message": "Something Went Wrong" });
+        res.status(400).json({ "status": 400, "message": "Something Went Wrong" , error:err.message});
     }
 };
 
