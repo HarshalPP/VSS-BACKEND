@@ -190,30 +190,29 @@ exports.batch_sort_by_weight_all_batch = async (req, res) => {
 
 exports.edit = async (req, res) => {
   try {
-    console.log(req.params.id)
-    const{_id}=req.params
-    const user_data = await Production_incharge.findById(_id);
-    if(!user_data){
-      res.status(404).json({message:'Stock id is not found'})
+    const Id = req.params.id; // Be consistent with the parameter
+    console.log("Id is" , Id)
+    const user_data = await Production_incharge.findOne({ _id: Id });
+    
+    if (!user_data) {
+      return res.status(404).json({ message: 'Stock id is not found' });
     }
-    if (user_data) {
-      const updatedUser = await Production_incharge.findById(
-        req.params.id
-      ).exec();
-      updatedUser.set(req.body);
-      const updateSalesorder = await updatedUser.save();
-      res.status(200).json({
-        status: 200,
-        msg: "record sucessfully updated",
-        res: updatedUser,
-      });
-    } else {
-      res.json({ status: "400", message: "No Record found" });
-    }
+
+    // If record is found, proceed with updating
+    user_data.set(req.body);
+    const updatedUser = await user_data.save();
+
+    return res.status(200).json({
+      status: 200,
+      msg: "Record successfully updated",
+      res: updatedUser,
+    });
+
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    return res.status(400).json({ message: err.message });
   }
 };
+
 
 
 // DElete by ID
