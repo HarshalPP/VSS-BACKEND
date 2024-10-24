@@ -447,43 +447,83 @@ return res.status(201).json({
 
 exports.availableStock = async (req, res) => {
   try {
-      // Destructure the parameters from the query string
-      const {
-          product,
-          company,
-          grade,
-          topcolor,
-          coatingnum, // Assuming this is 'coatingnum' in the query
-          temper,
-          guardfilm
-      } = req.query;
+    // Destructure the parameters from the query string
+    const {
+      product,
+      company,
+      grade,
+      topcolor,
+      coating, // Passing 'coating' directly
+      temper,
+      guardfilm
+    } = req.query;
 
-      // Construct a query object based on the provided parameters
-      const query = {};
+    // Construct a query object based on the provided parameters
+    const query = {};
 
-      // Add properties to the query object only if they are provided
-      if (product) query.product = product;
-      if (company) query.company = company;
-      if (grade) query.grade = grade;
-      if (topcolor) query.topcolor = topcolor;
-      if (coatingnum) query.coating = coatingnum; // Assuming 'coatingnum' should map to 'coating'
-      if (temper) query.temper = temper;
-      if (guardfilm) query.guardfilm = guardfilm;
+    // Add properties to the query object only if they are provided
+    if (product) query.product = product;
+    if (company) query.company = company;
+    if (grade) query.grade = grade;
+    if (topcolor) query.topcolor = topcolor;
+    if (coating) query.coating = Number(coating); // Convert 'coating' to a number
+    if (temper) query.temper = temper;
+    if (guardfilm) query.guardfilm = guardfilm;
 
-      // Query the database using the constructed query object
-      const filteredData = await stock.find(query);
+    // Query the database using the constructed query object
+    const filteredData = await stock.findOne(query);
+    console.log(filteredData, "filteredData");
 
+    // Check if the filtered data is null
+    if (!filteredData) {
+      return res.status(400).json({
+        isAvailable: 'False',
+        status: 400,
+        message: "Out Of Stock"
+      });
+    }
 
-      if (filteredData.length === 0) {
-          return res.status(400).json({ isAvailable: 'False', status: 400, message: "Out Of Stock" });
-      } else {
-          return res.status(200).json({ isAvailable: 'True', status: 200, message: "Stock Available", filteredData });
-      }
+    // Check that every provided field matches in the filtered data
+    const hasAllFields = [
+      !product || filteredData.product === product,
+      !company || filteredData.company === company,
+      !grade || filteredData.grade === grade,
+      !topcolor || filteredData.topcolor === topcolor,
+      !temper || filteredData.temper === temper,
+      !guardfilm || filteredData.guardfilm === guardfilm,
+    ].every(Boolean); // Ensure all conditions are true
+
+    console.log(hasAllFields, "hasAllFields-------");
+
+    // If any required field is not matching, return "Out Of Stock"
+    if (!hasAllFields) {
+      return res.status(400).json({
+        isAvailable: 'False',
+        status: 400,
+        message: "Out Of Stock"
+      });
+    }
+
+    // If all fields exist and match, return the available stock data
+    return res.status(200).json({
+      isAvailable: 'True',
+      status: 200,
+      message: "Stock Available",
+      filteredData
+    });
+
   } catch (error) {
-      console.error(error);
-      return res.status(500).json({ status: 500, message: "Something Went Wrong" });
+    console.error(error);
+    return res.status(500).json({
+      status: 500,
+      message: "Something Went Wrong"
+    });
   }
 };
+
+
+
+
 
 
 
