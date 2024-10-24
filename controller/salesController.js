@@ -446,58 +446,45 @@ return res.status(201).json({
 
 
 exports.availableStock = async (req, res) => {
-    try {
-        const {
-            product,
-            company,
-            grade,
-            topcolor,
-            coating, // Assuming it's 'coatingnum' in req.query
-            temper,
-            guardfilm
-        } = req.query;
+  try {
+      // Destructure the parameters from the query string
+      const {
+          product,
+          company,
+          grade,
+          topcolor,
+          coatingnum, // Assuming this is 'coatingnum' in the query
+          temper,
+          guardfilm
+      } = req.query;
 
-        // Construct a query object based on the provided parameters
-        const query = {
-            product,
-            company,
-            grade,
-            topcolor,
-            coating, // Map 'coatingnum' to 'coating' field
-            temper,
-            guardfilm
-        };
+      // Construct a query object based on the provided parameters
+      const query = {};
 
-        // Use the query to retrieve all data from the database
-        const allStockData = await stock.find({});
+      // Add properties to the query object only if they are provided
+      if (product) query.product = product;
+      if (company) query.company = company;
+      if (grade) query.grade = grade;
+      if (topcolor) query.topcolor = topcolor;
+      if (coatingnum) query.coating = coatingnum; // Assuming 'coatingnum' should map to 'coating'
+      if (temper) query.temper = temper;
+      if (guardfilm) query.guardfilm = guardfilm;
 
-        console.log("All stock data:", allStockData);
+      // Query the database using the constructed query object
+      const filteredData = await stock.find(query);
 
-        // Filter the data based on the provided parameters
-        const filteredData = allStockData.filter(data => {
-            return (
-                (!product || data.product === product) &&
-                (!company || data.company === company) &&
-                (!grade || data.grade === grade) &&
-                (!topcolor || data.topcolor === topcolor) &&
-                (!coating || data.coating === coating) &&
-                (!temper || data.temper === temper) &&
-                (!guardfilm || data.guardfilm === guardfilm)
-            );
-        });
 
-        console.log("Filtered data:", filteredData);
-
-        if (filteredData.length === 0) {
-            return res.status(400).json({ isAvailable: 'False', status: 400, message: "Out Of Stock" });
-        } else {
-            return res.status(200).json({ isAvailable: 'True', status: 200, message: "Stock Available", filteredData });
-        }
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ status: 500, message: "Something Went Wrong" });
-    }
+      if (filteredData.length === 0) {
+          return res.status(400).json({ isAvailable: 'False', status: 400, message: "Out Of Stock" });
+      } else {
+          return res.status(200).json({ isAvailable: 'True', status: 200, message: "Stock Available", filteredData });
+      }
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ status: 500, message: "Something Went Wrong" });
+  }
 };
+
 
 
 
