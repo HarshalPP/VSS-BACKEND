@@ -2,6 +2,8 @@ var Production_incharge = require("../models/Stock_M");
 const moment=require('moment')
 const createMoment=moment()
 
+
+// create the Stocks //
 exports.create = async (req, res) => {
   const qwe = req.body;
 
@@ -157,6 +159,8 @@ exports.batch_get_all = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
 exports.batch_getbyweight = async (req, res) => {
   try {
     let thikness_sel = req.body.thickness_selected;
@@ -332,6 +336,8 @@ exports.allRecords = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
 
 //-----------------------**------------------**----------------------**----------------
 exports.filter_in_stock = async (req, res) => {

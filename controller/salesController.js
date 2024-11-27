@@ -455,11 +455,12 @@ exports.availableStock = async (req, res) => {
       topcolor,
       coating, // Passing 'coating' directly
       temper,
-      guardfilm
+      guardfilm,
     } = req.query;
 
     // Construct a query object based on the provided parameters
     const query = {};
+  
 
     // Add properties to the query object only if they are provided
     if (product) query.product = product;
@@ -470,10 +471,9 @@ exports.availableStock = async (req, res) => {
     if (temper) query.temper = temper;
     if (guardfilm) query.guardfilm = guardfilm;
 
+
     // Query the database using the constructed query object
     const filteredData = await stock.findOne(query);
-    console.log(filteredData, "filteredData");
-
     // Check if the filtered data is null
     if (!filteredData) {
       return res.status(400).json({
@@ -482,6 +482,16 @@ exports.availableStock = async (req, res) => {
         message: "Out Of Stock"
       });
     }
+
+    // also check if weight is lessthen to avaiable weight so that we can check the stock is available or not
+
+    if (filteredData.weight < req.query.weight) {
+      return res.status(400).json({
+        isAvailable: 'False',
+        status: 400,
+        message: "We have stock , but not a sufficient weight"})
+
+      }
 
     // Check that every provided field matches in the filtered data
     const hasAllFields = [
