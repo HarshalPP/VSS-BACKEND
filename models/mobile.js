@@ -43,7 +43,7 @@ const mobileSchema=new Schema({
 
     Role:{
       type:String,
-      enum:['salesManager','ProductionHead', 'ProductionIncharge','Dispatchmanager','Billing in-charge'],
+      enum:['salesManager','ProductionHead', 'ProductionIncharge','Dispatchmanager','Billing in-charge' , 'StockManager'],
       required:true
     }
 
