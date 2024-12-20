@@ -47,7 +47,7 @@ const Production_Incahrge=require('./routes/Production_Incharge')
 const Dispatch=require('./routes/Dispatch_Manager.js')
 
 // Root route
-app.use("/", (req, res) => {
+app.get("/", (req, res) => {
   res.send("API is running!");
 });
 app.use("/admin", adminRouter);
