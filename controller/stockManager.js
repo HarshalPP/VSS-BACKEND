@@ -57,8 +57,8 @@ const session = require('express-session')
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt')
 const secretkey = process.env.SECRETKEY;
-const redis = require('redis');
-const client = redis.createClient();
+// const redis = require('redis');
+// const client = redis.createClient();
 
 
 
@@ -148,13 +148,13 @@ exports.create = async (req, res) => {
   }
 };
 
-client.on('error', (err) => {
-  console.error('Redis error:', err);
-});
+// client.on('error', (err) => {
+//   console.error('Redis error:', err);
+// });
 
-client.on('connect', () => {
-  console.log('Connected to Redis server');
-});
+// client.on('connect', () => {
+//   console.log('Connected to Redis server');
+// });
 
 exports.get = async (req, res) => {
   try {

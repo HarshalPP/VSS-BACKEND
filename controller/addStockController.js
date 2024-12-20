@@ -1,9 +1,9 @@
 const AddStock = require("../models/addStockSchema");
 // import { createClient } from 'redis';
-const redis = require('redis');
+// const redis = require('redis');
 
-// const client = createClient();
-const client = redis.createClient();
+// // const client = createClient();
+// const client = redis.createClient();
 
 
 exports.create = async (req, res) => {
@@ -75,13 +75,13 @@ exports.create = async (req, res) => {
   };
 
   
-client.on('error', (err) => {
-    console.error('Redis error:', err);
-});
+// client.on('error', (err) => {
+//     console.error('Redis error:', err);
+// });
 
-client.on('connect', () => {
-    console.log('Connected to Redis server');
-});
+// client.on('connect', () => {
+//     console.log('Connected to Redis server');
+// });
 
 //admin also get the stock by this api......
 exports.get = async (req, res) => {

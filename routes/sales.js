@@ -9,6 +9,12 @@ router.get("/", token,salesController.allRecords);
 router.get("/get/:id", token, salesController.get);
 
 router.get("/availableStock", token, salesController.availableStock);
+
+router.get("/checkStock",  salesController.checkStocks);
+
+
+
+
 // Create One Route
 router.post("/create", token, salesController.create);
 //Put One

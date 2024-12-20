@@ -6,14 +6,14 @@ const { notify } = require("../routes/productionhead");
 const sales = require("../models/sales");
 const eventEmitter = require("../utils/eventEmitter");
 const SalesManager = require('../models/sales')
-const redisClient = require('../config/redis')
+// const redisClient = require('../config/redis')
 const { promisify } = require('util');
 
 // Assuming redisClient is already created and connected elsewhere in your code
 // Example: const redisClient = redis.createClient();
 
-const getAsync = promisify(redisClient.get).bind(redisClient);
-const setExAsync = promisify(redisClient.setex).bind(redisClient);
+// const getAsync = promisify(redisClient.get).bind(redisClient);
+// const setExAsync = promisify(redisClient.setex).bind(redisClient);
 
 
 // exports.checkOrderDetails = async (req, res) => {

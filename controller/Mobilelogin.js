@@ -2,7 +2,7 @@ const Mobilelogin = require('../models/mobile');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const keyvalue = process.env.KEY;
-const redisClient = require('../config/redis');
+// const redisClient = require('../config/redis');
 const { promisify } = require('util');
 const { json } = require('express');
 const AWS = require('aws-sdk');
@@ -103,7 +103,7 @@ exports.create = async (req, res) => {
         ProfileImage: imageUrl, // Use the uploaded image URL
         LocalProfileImage: localFilePath, // Store local file path in database
         Tenure:Tenure,
-        CurrentDate:Date.now()
+        CurrentDate:CurrentDate || Date.now()
       });
 
       

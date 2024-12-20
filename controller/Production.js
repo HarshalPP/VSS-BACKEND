@@ -56,6 +56,26 @@ exports.create = async (req, res) => {
     const qwe = req.body; // Don't forget to declare variables with 'const', 'let', or 'var'.
     const feet = 304.8; // 1 feet = 304.8mm
 
+  const existingStocks = await Production_incharge.findOne({
+    product: qwe.product,
+    company: qwe.company,
+    grade: qwe.grade,
+    topcolor: qwe.topcolor,
+    coating: qwe.coating,
+    temper: qwe.temper,
+    guardfilm: qwe.guardfilm, // Fixed typo 'gauardfilm' to 'guardfilm'
+    thickness: qwe.thickness,
+    width: qwe.width,
+    length: qwe.length,
+  })
+
+  if(existingStocks){
+    existingStocks.weight += qwe.weight;
+    await existingStocks.save();
+    res.status(200).json({ message: 'Stock updated successfully', stock: existingStocks});
+  }
+  else{
+
     const user = new Production_incharge({
         product: qwe.product,
         company: qwe.company,
@@ -91,6 +111,8 @@ exports.create = async (req, res) => {
         approx_weight_cut: qwe.density * qwe.thickness * qwe.width * qwe.pcs_cut * qwe.length_per_pcs_cut,
         total_length_cut: qwe.pcs_cut * qwe.length_per_pcs_cut,
     });
+
+}
 
     try {
         const Inventor = await user.save();
