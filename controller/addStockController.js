@@ -43,7 +43,7 @@ exports.create = async (req, res) => {
       console.log("existingStock data is" , existingStock)
   
       if (existingStock) {
-        existingStock.weight += Weight;
+        existingStock.Weight += Weight;
         await existingStock.save();
         console.log('Stock updated successfully:', existingStock);
         res.status(200).json({ message: 'Stock updated successfully', stock: existingStock });
