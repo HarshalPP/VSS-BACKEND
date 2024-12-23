@@ -579,7 +579,7 @@ exports.checkStocks = async (req, res) => {
     }
 
     // Check if the weight is less than the available weight
-    if (filteredData.weight < weight) {
+    if (filteredData.weight < req.body.weight) {
       return res.status(400).json({
         isAvailable: 'False',
         status: 400,
