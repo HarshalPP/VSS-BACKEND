@@ -549,8 +549,7 @@ exports.checkStocks = async (req, res) => {
       temper,
       guardfilm,
       thickness,
-      width,
-      weight, // Ensure weight is included in the body
+      width
     } = req.body;
 
     // Construct a query object based on the provided parameters
