@@ -469,7 +469,7 @@ exports.availableStock = async (req, res) => {
     if (company) query.company = company;
     if (grade) query.grade = grade;
     if (topcolor) query.topcolor = topcolor;
-    if (coating) query.coating = Number(coating); // Convert 'coating' to a number
+    if (coating) query.coating = coating // Convert 'coating' to a number
     if (temper) query.temper = temper;
     if (guardfilm) query.guardfilm = guardfilm;
     if(thickness) query.thickness = thickness;
