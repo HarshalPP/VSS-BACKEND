@@ -5,7 +5,7 @@ const productionSchema = new Schema({
     company: String,
     grade: String,
     topcolor: String,
-    coating:'mixed',
+    coating:Number,
     temper: String,
     guardfilm: String,
     thickness: Number,
