@@ -100,8 +100,8 @@ exports.create = async (req, res) => {
         Role: Role,
         Phone: Phone,
         LastName: LastName,
-        ProfileImage: imageUrl, // Use the uploaded image URL
-        LocalProfileImage: localFilePath, // Store local file path in database
+        ProfileImage: imageUrl || 'https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png', // Use the uploaded image URL
+        LocalProfileImage: localFilePath || 'Nothing', // Store local file path in database
         Tenure:Tenure,
         CurrentDate:CurrentDate || Date.now()
       });
