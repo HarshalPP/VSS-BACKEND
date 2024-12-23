@@ -499,12 +499,12 @@ exports.availableStock = async (req, res) => {
 
     // Check that every provided field matches in the filtered data
     const hasAllFields = [
-      !product || filteredData.product === product,
-      !company || filteredData.company === company,
-      !grade || filteredData.grade === grade,
-      !topcolor || filteredData.topcolor === topcolor,
-      !temper || filteredData.temper === temper,
-      !guardfilm || filteredData.guardfilm === guardfilm,
+      !product || filteredData.product == product,
+      !company || filteredData.company == company,
+      !grade || filteredData.grade == grade,
+      !topcolor || filteredData.topcolor == topcolor,
+      !temper || filteredData.temper == temper,
+      !guardfilm || filteredData.guardfilm == guardfilm,
     ].every(Boolean); // Ensure all conditions are true
 
     console.log(hasAllFields, "hasAllFields-------");
