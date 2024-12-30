@@ -175,6 +175,7 @@ exports.create = async (req, res) => {
         const browser = await puppeteer.launch({
             headless: 'new', 
             args: ['--no-sandbox'],// Set to true if you want to run iya n headless mode
+            executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', // Update this path
             
         });
 
