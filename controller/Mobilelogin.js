@@ -68,7 +68,7 @@ exports.create = async (req, res) => {
 
       // Hash the password using bcrypt
       const hashedPassword = await bcrypt.hash(Password, 10);
-      const bucketName = 'orderpdfnew';
+      const bucketName = 'vss-project';
       // Upload image to S3
       const uploadParams = {
         Bucket: bucketName, // Update with your S3 bucket name

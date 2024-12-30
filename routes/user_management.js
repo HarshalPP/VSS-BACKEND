@@ -14,8 +14,8 @@ dotenv.config();
 // Configure AWS
 AWS.config.update({
   region:'ap-south-1',
-  accessKeyId: 'AKIAULYU44YV3UX6YHWA',
-  secretAccessKey: '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'
+  accessKeyId: 'AKIATFBMO7JVESQOX5UO',
+  secretAccessKey: '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'
 });
 
 const S3 = new AWS.S3();
@@ -38,7 +38,7 @@ const upload = multer({
 // Function to Upload to S3
 const uploadToS3 = (fileData) => {
   const params = {
-    Bucket: 'usermanagment-img',
+    Bucket: 'vss-project',
     Key: `${Date.now().toString()}.png`,
     Body: fileData
   };
