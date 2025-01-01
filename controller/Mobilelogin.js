@@ -22,6 +22,8 @@ AWS.config.update({
 const s3 = new AWS.S3({
   accessKeyId: process.env.ACCESS_KEY_ID ,
   secretAccessKey: process.env. SECRET_ACCESS_KEY,
+  region: 'ap-south-1',
+  signatureVersion: 'v4', // Add this if the bucket uses v4 signatures
 });
 
 
