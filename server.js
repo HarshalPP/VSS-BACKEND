@@ -5,10 +5,12 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const AWS = require('aws-sdk');
 const bodyParser = require('body-parser')
+const path = require('path');
 
 
 // Configure express.json() middleware to handle JSON data
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'tmp')));
 
 
 
