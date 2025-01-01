@@ -123,78 +123,82 @@
 // };
 
 
-const Mobilelogin = require('../models/mobile');
+const fs = require('fs');
+const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const Mobilelogin = require('../models/mobile');
+const multer = require('multer');
 const dotenv = require('dotenv');
 dotenv.config();
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
-// Configure Multer for local file storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
+const keyvalue = process.env.KEY;
 
+// Define the fileFilter function for multer
 const fileFilter = (req, file, cb) => {
   if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-    return cb(new Error('Only image files are allowed!'), false);
+    return cb(new Error('Only image files are allowed!'));
   }
   cb(null, true);
 };
 
+// Configure multer for handling file uploads
+const storage = multer.memoryStorage(); // Use memory storage to access the file buffer
 const upload = multer({ storage, fileFilter });
 
-// Middleware to handle single file upload
+// Middleware for single file upload
 exports.uploadSingle = upload.single('ProfileImage');
 
-// Create user
+// Create a new user and upload profile image
 exports.create = async (req, res) => {
   try {
     const { UserName, Password, Status, Role, Phone, LastName, CurrentDate, Tenure } = req.body;
 
-    // Use Multer to handle the file upload
-    this.uploadSingle(req, res, async (err) => {
+    // Multer middleware will handle the file upload
+    exports.uploadSingle(req, res, async (err) => {
       if (err) {
-        return res.status(400).json({ error: 'File upload failed', details: err.message });
+        return res.status(400).json({ error: 'File upload failed' });
       }
 
-      // Access the uploaded file
-      const uploadedFile = req.file;
-      if (!uploadedFile) {
+      // Access the uploaded file from req.file
+      const ProfileImage = req.file;
+
+      if (!ProfileImage) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
 
-      const imageUrl = `https://vss-backend.vercel.app/uploads/${uploadedFile.filename}`; // Set file URL
+      // Set the directory for temporary storage based on the environment
+      const uploadDir = process.env.NODE_ENV === 'production' ? '/tmp/' : './tmp/';
+      
+      // Ensure the directory exists (for local development)
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
 
-      // Hash the password
+      // Define the temporary file path
+      const tempFilePath = path.join(uploadDir, `${Date.now()}-${ProfileImage.originalname}`);
+      fs.writeFileSync(tempFilePath, ProfileImage.buffer);
+
+      // Hash the password using bcrypt
       const hashedPassword = await bcrypt.hash(Password, 10);
 
-      // Create a new user
+      // Create a new Mobilelogin user
       const mobileUser = new Mobilelogin({
-        UserName,
+        UserName: UserName,
         Password: hashedPassword,
-        Status,
-        Role,
-        Phone,
-        LastName,
-        ProfileImage: imageUrl,
-        Tenure,
+        Status: Status,
+        Role: Role,
+        Phone: Phone,
+        LastName: LastName,
+        ProfileImage: tempFilePath, // Temporarily store the file path (use cloud storage for production)
+        Tenure: Tenure,
         CurrentDate: CurrentDate || Date.now(),
       });
 
-      // Save the user to the database
+      // Save the new user to the database
       const savedUser = await mobileUser.save();
+      console.log('Data', savedUser);
+
       res.status(200).json({ message: 'User created successfully', user: savedUser });
     });
   } catch (error) {
@@ -202,7 +206,6 @@ exports.create = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 
 // const getAsync = promisify(redisClient.get).bind(redisClient);
 // const setExAsync = promisify(redisClient.setex).bind(redisClient);
