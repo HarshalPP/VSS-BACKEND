@@ -1,121 +1,202 @@
+// const Mobilelogin = require('../models/mobile');
+// const bcrypt = require('bcrypt');
+// const jwt = require('jsonwebtoken');
+// const keyvalue = process.env.KEY;
+// // const redisClient = require('../config/redis');
+// const { promisify } = require('util');
+// const { json } = require('express');
+// const AWS = require('aws-sdk');
+// const fs = require('fs');
+// const path = require('path');
+// const dotenv = require('dotenv');
+// dotenv.config();
+
+// const multer = require('multer'); // Import Multer
+
+// AWS.config.update({
+//   accessKeyId: "RmBp5xOKWdH1q3/2k5KsDIZl5R/6tGF8vP7dLtj8",
+//   secretAccessKey: "AKIATFBMO7JVESQOX5UO",
+//   region: 'ap-south-1',
+// });
+
+// const s3 = new AWS.S3({
+//   accessKeyId: process.env.ACCESS_KEY_ID ,
+//   secretAccessKey: process.env. SECRET_ACCESS_KEY,
+//   region: 'ap-south-1',
+//   signatureVersion: 'v4', // Add this if the bucket uses v4 signatures
+// });
+
+
+// // Define the fileFilter function for multer
+// const fileFilter = (req, file, cb) => {
+//   if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+//     return cb(new Error('Only image files are allowed!'));
+//   }
+//   cb(null, true);
+// };
+
+
+
+// // Configure multer with the fileFilter function
+// const upload = multer({ fileFilter });
+
+// // Export the upload middleware
+// exports.uploadSingle = upload.single('ProfileImage');
+
+// exports.create = async (req, res) => {
+//   try {
+//     const { UserName, Password, Status, Role, Phone, LastName , CurrentDate, Tenure } = req.body;
+
+//     console.log("UserName is ", UserName);
+
+//     // Multer middleware will handle the file upload
+//     exports.uploadSingle(req, res, async (err) => {
+//       if (err) {
+//         return res.status(400).json({ error: 'File upload failed' });
+//       }
+
+//       // Access the uploaded file from req.file
+//       const ProfileImage = req.file;
+//       console.log(ProfileImage)
+
+//       if (!ProfileImage) {
+//         return res.status(400).json({ error: 'No file uploaded' });
+//       }
+
+//       // Ensure that ProfileImage.buffer is accessible and not undefined
+//       if (!ProfileImage.buffer || ProfileImage.buffer.length === 0) {
+//         return res.status(400).json({ error: 'Uploaded file buffer is empty or undefined' });
+//       }
+
+//       // Hash the password using bcrypt
+//       const hashedPassword = await bcrypt.hash(Password, 10);
+//       const bucketName = 'vss-project';
+//       // Upload image to S3
+//       const uploadParams = {
+//         Bucket: bucketName, // Update with your S3 bucket name
+//         Key: `profile-images/${UserName}-${Date.now()}`,
+//         Body: ProfileImage.buffer, // Use the uploaded file buffer
+//         ContentType: ProfileImage.mimetype // Use the uploaded file's MIME type
+//       };
+
+//       const s3UploadResponse = await s3.upload(uploadParams).promise();
+//       const imageUrl = s3UploadResponse.Location;
+
+//       const localUploadsDir = path.join(__dirname, 'uploads');
+
+//       // Check if the uploads directory exists, create it if not
+//       if (!fs.existsSync(localUploadsDir)) {
+//         fs.mkdirSync(localUploadsDir, { recursive: true });
+//       }
+
+//       // Save the file locally
+//       const localFilePath = path.join(localUploadsDir, ProfileImage.originalname);
+//       fs.writeFileSync(localFilePath, ProfileImage.buffer);
+
+
+//       // Create a new Mobilelogin user
+//       const mobileUser = new Mobilelogin({
+//         UserName: UserName,
+//         Password: hashedPassword,
+//         Status: Status,
+//         Role: Role,
+//         Phone: Phone,
+//         LastName: LastName,
+//         ProfileImage: imageUrl || 'https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png', // Use the uploaded image URL
+//         LocalProfileImage: localFilePath || 'Nothing', // Store local file path in database
+//         Tenure:Tenure,
+//         CurrentDate:CurrentDate || Date.now()
+//       });
+
+      
+//       // Save the new user to the database
+//       const savedUser = await mobileUser.save();
+//       console.log("data", savedUser);
+
+//       res.status(200).json({ message: 'User created successfully', user: savedUser });
+//     });
+
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
+
+
 const Mobilelogin = require('../models/mobile');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const keyvalue = process.env.KEY;
-// const redisClient = require('../config/redis');
-const { promisify } = require('util');
-const { json } = require('express');
-const AWS = require('aws-sdk');
-const fs = require('fs');
-const path = require('path');
 const dotenv = require('dotenv');
 dotenv.config();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
-const multer = require('multer'); // Import Multer
-
-AWS.config.update({
-  accessKeyId: "RmBp5xOKWdH1q3/2k5KsDIZl5R/6tGF8vP7dLtj8",
-  secretAccessKey: "AKIATFBMO7JVESQOX5UO",
-  region: 'ap-south-1',
+// Configure Multer for local file storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
 });
 
-const s3 = new AWS.S3({
-  accessKeyId: process.env.ACCESS_KEY_ID ,
-  secretAccessKey: process.env. SECRET_ACCESS_KEY,
-  region: 'ap-south-1',
-  signatureVersion: 'v4', // Add this if the bucket uses v4 signatures
-});
-
-
-// Define the fileFilter function for multer
 const fileFilter = (req, file, cb) => {
   if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-    return cb(new Error('Only image files are allowed!'));
+    return cb(new Error('Only image files are allowed!'), false);
   }
   cb(null, true);
 };
 
+const upload = multer({ storage, fileFilter });
 
-
-// Configure multer with the fileFilter function
-const upload = multer({ fileFilter });
-
-// Export the upload middleware
+// Middleware to handle single file upload
 exports.uploadSingle = upload.single('ProfileImage');
 
+// Create user
 exports.create = async (req, res) => {
   try {
-    const { UserName, Password, Status, Role, Phone, LastName , CurrentDate, Tenure } = req.body;
+    const { UserName, Password, Status, Role, Phone, LastName, CurrentDate, Tenure } = req.body;
 
-    console.log("UserName is ", UserName);
-
-    // Multer middleware will handle the file upload
-    exports.uploadSingle(req, res, async (err) => {
+    // Use Multer to handle the file upload
+    this.uploadSingle(req, res, async (err) => {
       if (err) {
-        return res.status(400).json({ error: 'File upload failed' });
+        return res.status(400).json({ error: 'File upload failed', details: err.message });
       }
 
-      // Access the uploaded file from req.file
-      const ProfileImage = req.file;
-      console.log(ProfileImage)
-
-      if (!ProfileImage) {
+      // Access the uploaded file
+      const uploadedFile = req.file;
+      if (!uploadedFile) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
 
-      // Ensure that ProfileImage.buffer is accessible and not undefined
-      if (!ProfileImage.buffer || ProfileImage.buffer.length === 0) {
-        return res.status(400).json({ error: 'Uploaded file buffer is empty or undefined' });
-      }
+      const imageUrl = `https://vss-backend.vercel.app/uploads/${uploadedFile.filename}`; // Set file URL
 
-      // Hash the password using bcrypt
+      // Hash the password
       const hashedPassword = await bcrypt.hash(Password, 10);
-      const bucketName = 'vss-project';
-      // Upload image to S3
-      const uploadParams = {
-        Bucket: bucketName, // Update with your S3 bucket name
-        Key: `profile-images/${UserName}-${Date.now()}`,
-        Body: ProfileImage.buffer, // Use the uploaded file buffer
-        ContentType: ProfileImage.mimetype // Use the uploaded file's MIME type
-      };
 
-      const s3UploadResponse = await s3.upload(uploadParams).promise();
-      const imageUrl = s3UploadResponse.Location;
-
-      const localUploadsDir = path.join(__dirname, 'uploads');
-
-      // Check if the uploads directory exists, create it if not
-      if (!fs.existsSync(localUploadsDir)) {
-        fs.mkdirSync(localUploadsDir, { recursive: true });
-      }
-
-      // Save the file locally
-      const localFilePath = path.join(localUploadsDir, ProfileImage.originalname);
-      fs.writeFileSync(localFilePath, ProfileImage.buffer);
-
-
-      // Create a new Mobilelogin user
+      // Create a new user
       const mobileUser = new Mobilelogin({
-        UserName: UserName,
+        UserName,
         Password: hashedPassword,
-        Status: Status,
-        Role: Role,
-        Phone: Phone,
-        LastName: LastName,
-        ProfileImage: imageUrl || 'https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png', // Use the uploaded image URL
-        LocalProfileImage: localFilePath || 'Nothing', // Store local file path in database
-        Tenure:Tenure,
-        CurrentDate:CurrentDate || Date.now()
+        Status,
+        Role,
+        Phone,
+        LastName,
+        ProfileImage: imageUrl,
+        Tenure,
+        CurrentDate: CurrentDate || Date.now(),
       });
 
-      
-      // Save the new user to the database
+      // Save the user to the database
       const savedUser = await mobileUser.save();
-      console.log("data", savedUser);
-
       res.status(200).json({ message: 'User created successfully', user: savedUser });
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
