@@ -14,8 +14,8 @@ dotenv.config();
 const multer = require('multer'); // Import Multer
 
 AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY,
+  accessKeyId: "RmBp5xOKWdH1q3/2k5KsDIZl5R/6tGF8vP7dLtj8",
+  secretAccessKey: "AKIATFBMO7JVESQOX5UO",
   region: 'ap-south-1',
 });
 
