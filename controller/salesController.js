@@ -154,10 +154,11 @@ exports.create = async (req, res) => {
                 company: company,
                 grade: grade,
                 topcolor: topcolor,
-                coatingnum: coating,
+                coating: coating,
                 temper: temper,
                 guardfilm: guardfilm
             });
+
 
 
 
