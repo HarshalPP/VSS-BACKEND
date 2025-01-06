@@ -78,365 +78,774 @@ eventEmitter.on('OrderRejected', async ({ salesPerson }) => {
 
 
  /// Create the Order  ///
-exports.create = async (req, res) => {
-    try {
-        const data = (max) => {
-            const newdata = Math.floor(Math.random() * max);
-            console.log(newdata);
-            return newdata;
-        };
+// exports.create = async (req, res) => {
+//     try {
+//         const data = (max) => {
+//             const newdata = Math.floor(Math.random() * max);
+//             console.log(newdata);
+//             return newdata;
+//         };
 
-        // Replace max with a specific value when calling the function
-        const result = data(1000000000000000); // Replace 100 with your desired max value
+//         // Replace max with a specific value when calling the function
+//         const result = data(1000000000000000); // Replace 100 with your desired max value
 
-        // Create a new sales order instance
-        const orderId = result;  // Store the generated order ID in a variable
-        console.log("orderId is " , orderId)
-        const pdfDirectory = path.join(__dirname, 'order');  // Specify the directory where you want to save the PDF files
-        const pdfPath = path.join(pdfDirectory, `${orderId}.pdf`);  // Specify the path for the PDF file
-        console.log(pdfPath)
+//         // Create a new sales order instance
+//         const orderId = result;  // Store the generated order ID in a variable
+//         console.log("orderId is " , orderId)
+//         const pdfDirectory = path.join(__dirname, 'order');  // Specify the directory where you want to save the PDF files
+//         const pdfPath = path.join(pdfDirectory, `${orderId}.pdf`);  // Specify the path for the PDF file
+//         console.log(pdfPath)
 
-        // Create the 'order' directory if it doesn't exist
-        await fs.mkdir(pdfDirectory, { recursive: true });
+//         // Create the 'order' directory if it doesn't exist
+//         await fs.mkdir(pdfDirectory, { recursive: true });
 
-        const user = new salesorder({
-            clientName: req.body.clientName,
-            firmName: req.body.firmName,
-            address: req.body.address,
-            city: req.body.city,
-            phone_no: req.body.phone_no,
-            sales_id: req.body.sales_id,
-            Email:req.body.Email,
-            sales_name: req.body.sales_name,
-            orderId: orderId,  // Use the stored order ID
-            currentDate: new Date().toISOString(),
-            deliveryDate: req.body.deliveryDate,
-            note: req.body.note,
-            orderstatus: req.body.orderstatus,
-            Order_mark: req.body.Order_mark,
-            products: req.body.products,
-            ph_id: req.body.ph_id,
-            ph_name: req.body.ph_name,
-            process_bar: req.body.process_bar,
-            smName: req.body.smName,
-            vehicleNum: req.body.vehicleNum,
-            dpDate: req.body.dpDate,
-            dpRecieved: req.body.dpRecieved,
-            dpPhone: req.body.dpPhone,
-            dpTotalWeight: req.body.dpTotalWeight,
-            productionincharge: req.body.productionincharge,
-            pdf_order: {
-                type: 'application/pdf',
-                data: null,  // Initialize with null, will be replaced later
-            },
-            pdf_url:null
+//         const user = new salesorder({
+//             clientName: req.body.clientName,
+//             firmName: req.body.firmName,
+//             address: req.body.address,
+//             city: req.body.city,
+//             phone_no: req.body.phone_no,
+//             sales_id: req.body.sales_id,
+//             Email:req.body.Email,
+//             sales_name: req.body.sales_name,
+//             orderId: orderId,  // Use the stored order ID
+//             currentDate: new Date().toISOString(),
+//             deliveryDate: req.body.deliveryDate,
+//             note: req.body.note,
+//             orderstatus: req.body.orderstatus,
+//             Order_mark: req.body.Order_mark,
+//             products: req.body.products,
+//             ph_id: req.body.ph_id,
+//             ph_name: req.body.ph_name,
+//             process_bar: req.body.process_bar,
+//             smName: req.body.smName,
+//             vehicleNum: req.body.vehicleNum,
+//             dpDate: req.body.dpDate,
+//             dpRecieved: req.body.dpRecieved,
+//             dpPhone: req.body.dpPhone,
+//             dpTotalWeight: req.body.dpTotalWeight,
+//             productionincharge: req.body.productionincharge,
+//             pdf_order: {
+//                 type: 'application/pdf',
+//                 data: null,  // Initialize with null, will be replaced later
+//             },
+//             pdf_url:null
 
-        });
+//         });
 
-             // Check stock availability for each product in the order
-        for (const product of req.body.products) {
-            const product_name = product.select_product;
-            const company = product.company;
-            const grade = product.grade;
-            const topcolor = product.topcolor;
-            const coating = product.coating;
-            const temper = product.temper;
-            const guardfilm = product.guardfilm;
-            const weight = product.weight;
-            const thickness =  product.thickness;
-            const width = product.width;
-            const length = product.length;
-            const pcs = product.pcs;
-            const rate=product.rate;
+//              // Check stock availability for each product in the order
+//         for (const product of req.body.products) {
+//             const product_name = product.select_product;
+//             const company = product.company;
+//             const grade = product.grade;
+//             const topcolor = product.topcolor;
+//             const coating = product.coating;
+//             const temper = product.temper;
+//             const guardfilm = product.guardfilm;
+//             const weight = product.weight;
+//             const thickness =  product.thickness;
+//             const width = product.width;
+//             const length = product.length;
+//             const pcs = product.pcs;
+//             const rate=product.rate;
 
-            const stock_data = await stock.findOne({
-                product: product_name,
-                company: company,
-                grade: grade,
-                topcolor: topcolor,
-                coating: coating,
-                temper: temper,
-                guardfilm: guardfilm
-            });
-
-
+//             const stock_data = await stock.findOne({
+//                 product: product_name,
+//                 company: company,
+//                 grade: grade,
+//                 topcolor: topcolor,
+//                 coating: coating,
+//                 temper: temper,
+//                 guardfilm: guardfilm
+//             });
 
 
-            if (stock_data && stock_data.weight >= weight) {
 
-                // Sufficient stock is available, update stock quantity
-                stock_data.weight -= weight;
-                await stock_data.save();
-            } else {
-                return res.status(404).json({ "status": 404, "msg": 'Order cannot be placed due to insufficient stock' });
-            }
-        }
+
+//             if (stock_data && stock_data.weight >= weight) {
+
+//                 // Sufficient stock is available, update stock quantity
+//                 stock_data.weight -= weight;
+//                 await stock_data.save();
+//             } else {
+//                 return res.status(404).json({ "status": 404, "msg": 'Order cannot be placed due to insufficient stock' });
+//             }
+//         }
         
 
-        const browser = await puppeteer.launch({
-            headless: 'new', 
-            args: ['--no-sandbox'],// Set to true if you want to run iya n headless mode
-        });
+//         const browser = await puppeteer.launch({
+//             headless: 'new', 
+//             args: ['--no-sandbox'],// Set to true if you want to run iya n headless mode
+//         });
 
-        const page = await browser.newPage();
+//         const page = await browser.newPage();
 
-    const orderDetailsHTML = `
+//     const orderDetailsHTML = `
+// <!DOCTYPE html>
+// <html lang="en">
+//   <head>
+//     <meta charset="UTF-8" />
+//     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+//     <title>Order Details</title>
+//     <script src="https://cdn.tailwindcss.com"></script>
+//     <script>
+//       tailwind.config = {
+//         theme: {
+//           extend: {
+//             colors: {
+//               clifford: "#DA373D",
+//             },
+//           },
+//         },
+//       };
+//     </script>
+//     <style>
+//       .form {
+//         width: 800px;
+//         margin: 40px auto;
+//         padding: 20px;
+//         border: 1px solid #ccc;
+//         border-radius: 10px;
+//         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+//       }
+//       .header {
+//         justify-content: space-evenly;
+//         margin-bottom: 20px;
+//         display: flex;
+//         flex-direction: row;
+//         flex-wrap: wrap;
+//         gap: 20px;
+//       }
+//       .header label {
+//         /* margin-right: 10px; */
+//       }
+//       .header input {
+//         width: 150px;
+//         height: 30px;
+//         padding: 10px;
+//         border: 1px solid #ccc;
+//         border-radius: 5px;
+//       }
+//       .table {
+//         margin-bottom: 20px;
+//         width: 100%;
+//       }
+//       table {
+//         width: 100%;
+//         border-collapse: collapse;
+//       }
+//       th,
+//       td {
+//         border: 1px solid #ccc;
+//         padding: 10px;
+//         text-align: left;
+//       }
+//       th {
+//         background-color: #F0F0F0;
+//       }
+//       .footer {
+//         display: flex;
+//         flex-direction: column;
+//         justify-content: end;
+//         align-items: end;
+//         margin-top: 20px;
+//       }
+//       .Text {
+//         border: none; /* Removes the border */
+//         border-bottom: 1px solid black; /* Adds an underline */
+//         width: 150px;
+//         height: 30px;
+//         padding: 10px;
+//         outline: none; /* Removes the focus outline */
+//       }
+//       .parent-footer {
+//         display: flex;
+//         justify-content: space-between;
+//       }
+//       .footer label {
+//         margin-right: 10px;
+//       }
+//       .footer input {
+//         width: 150px;
+//         height: 30px;
+//         padding: 10px;
+//         border: 1px solid #ccc;
+//         border-radius: 5px;
+//       }
+//       .para1{
+//         width: 40%;
+//         margin-bottom: 20px;
+//         font-weight: 600;
+//       }
+//     </style>
+//   </head>
+//   <body>
+//     <div class="form">
+//       <div class="header flex flex-row justify-between">
+//         <div>DC No.: ${req.body.dpPhone}</div>
+//         <div class="flex flex-row items-center">
+//           <div>Date: ${req.body.deliveryDate}</div>
+//         </div>
+//       </div>
+//       <div class="mb-3">
+//         <div>
+//           M/S: ${req.body.ms}
+//           <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
+//         </div>
+//         <div>
+//           Broker: ${req.body.broker}
+//           <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
+//         </div>
+//         <div>
+//           Vehicle No.: ${req.body.vehicleNum }
+//           <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
+//         </div>
+//         <div>
+//           Transport: ${req.body.transport}
+//           <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
+//         </div>
+//       </div>
+//       <div class="table">
+//         <table>
+//           <thead>
+//             <tr>
+//               <th>Item</th>
+//               <th>Thickness</th>
+//               <th>Width</th>
+//               <th>Length</th>
+//               <th>Weight</th>
+//               <th>Pcs</th>
+//               <th>Rate</th>
+//               <th>Product</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             ${req.body.products.map((product, index) => `
+//             <tr>
+//               <td>${index + 1}</td>
+//               <td>${product.thickness}</td>
+//               <td>${product.width}</td>
+//               <td>${product.length}</td>
+//               <td>${product.weight}</td>
+//               <td>${product.pcs}</td>
+//               <td>${product.rate}</td>
+//               <td>${product.select_product}</td>
+//             </tr>
+//             `).join('')}
+//           </tbody>
+//         </table>
+//       </div>
+//       <div class="parent-footer">
+//         <div class="para1 mb-4 ">
+//           <p>
+//             हमारे यहाँ से माल रुकवा एवं प्रीति प्रेषण किया गया है। ट्रक में
+//             पर्ची लगने के उपरांत कर्ता की खपत होने की जवाबदारी हमारी नहीं होगी।
+//           </p>
+//         </div>
+//         <div class="footer">
+//           <div class="font-bold">
+//             Received by: ${req.body.Received_by}
+//             <div class="w-50 mb-4 ml-20"></div>
+//           </div>
+//           <div>
+//             Name: ${req.body.clientName}
+//             <div class="border-b-2 border-black-900 w-50 mb-4 ml-20"></div>
+//           </div>
+//           <div>
+//             Mob. ${req.body.phone_no}
+//             <div class="border-b-2 border-black-900 w-50 mb-4 ml-20"></div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   </body>
+// </html>
+// `;
+
+
+        
+//         await page.setContent(orderDetailsHTML);
+
+//         await page.pdf({ path: pdfPath, format: 'A4' });
+
+//         await browser.close();
+        
+//         // Create a read stream for the PDF file
+//         const pdfReadStream = fileSystem.createReadStream(pdfPath);
+
+//         const s3 = new AWS.S3({
+//             accessKeyId: process.env.ACCESS_KEY_ID ,
+//             secretAccessKey: process.env. SECRET_ACCESS_KEY,
+//           });
+          
+//         const bucketName = 'vss-project';
+
+//         const uploadParams = {
+//             Bucket: bucketName,
+//             Key: `${orderId}.pdf`,
+//             Body:pdfReadStream,  // Use fs.createReadStream here
+//             ContentType: 'application/pdf',
+//         };
+
+//        await s3.upload(uploadParams).promise();
+//         const params = {
+//             Bucket: bucketName,
+//             Key: `${orderId}.pdf`
+//         };
+
+//     // Get signed URL for the uploaded PDF
+//             const pdfURL = await s3.getSignedUrlPromise('getObject', params);
+
+//             console.log("pdfURL:" + pdfURL)
+
+//         // Set pdf_order data as the S3 URL
+//         user.pdf_url = pdfURL;
+
+
+//         // Ensure pdf_order is an object with type and data properties
+//         if (!user.pdf_order || typeof user.pdf_order !== 'object') {
+//             user.pdf_order = {
+//                 type: 'application/pdf',
+//                 data: null,
+//             };
+//         } else {
+//             // If pdf_order is already an object, ensure it has the required properties
+//             user.pdf_order.type = 'application/pdf';
+//             user.pdf_order.data = null;
+//         }
+
+//         // Set pdf_order data as the path to the saved PDF file
+//         user.pdf_order.data = pdfPath;
+        
+
+//         // Save the new sales order
+//         const newOrder = await user.save({ select: '-pdf_order' });
+        
+//       // Remove pdf_order from the newOrder object
+// if (newOrder.pdf_order) {
+//     newOrder.pdf_order = undefined;
+// }
+
+// // Send the response with the newOrder object
+// return res.status(201).json({
+//     status: 201,
+//     msg: 'Order successfully created',
+//     newOrder,
+// });
+
+//     } catch (err) {
+//         console.log(err);
+//         res.status(400).json({ "status": 400, "message": "Something Went Wrong" , error:err.message});
+//     }
+// };
+
+
+
+exports.create = async (req, res) => {
+  try {
+      const data = (max) => {
+          const newdata = Math.floor(Math.random() * max);
+          console.log(newdata);
+          return newdata;
+      };
+
+      // Replace max with a specific value when calling the function
+      const result = data(1000000000000000); // Replace 100 with your desired max value
+
+      // Create a new sales order instance
+      const orderId = result;  // Store the generated order ID in a variable
+      console.log("orderId is " , orderId)
+      const pdfDirectory = path.join(__dirname, 'order');  // Specify the directory where you want to save the PDF files
+      const pdfPath = path.join(pdfDirectory, `${orderId}.pdf`);  // Specify the path for the PDF file
+      console.log(pdfPath)
+
+      // Create the 'order' directory if it doesn't exist
+      await fs.mkdir(pdfDirectory, { recursive: true });
+
+      const user = new salesorder({
+          clientName: req.body.clientName,
+          firmName: req.body.firmName,
+          address: req.body.address,
+          city: req.body.city,
+          phone_no: req.body.phone_no,
+          sales_id: req.body.sales_id,
+          Email:req.body.Email,
+          sales_name: req.body.sales_name,
+          orderId: orderId,  // Use the stored order ID
+          currentDate: new Date().toISOString(),
+          deliveryDate: req.body.deliveryDate,
+          note: req.body.note,
+          orderstatus: req.body.orderstatus,
+          Order_mark: req.body.Order_mark,
+          products: req.body.products,
+          ph_id: req.body.ph_id,
+          ph_name: req.body.ph_name,
+          process_bar: req.body.process_bar,
+          smName: req.body.smName,
+          vehicleNum: req.body.vehicleNum,
+          dpDate: req.body.dpDate,
+          dpRecieved: req.body.dpRecieved,
+          dpPhone: req.body.dpPhone,
+          dpTotalWeight: req.body.dpTotalWeight,
+          productionincharge: req.body.productionincharge,
+          pdf_order: {
+              type: 'application/pdf',
+              data: null,  // Initialize with null, will be replaced later
+          },
+          pdf_url:null
+
+      });
+
+           // Check stock availability for each product in the order
+      for (const product of req.body.products) {
+          const product_name = product.select_product;
+          const company = product.company;
+          const grade = product.grade;
+          const topcolor = product.topcolor;
+          const coating = product.coating;
+          const temper = product.temper;
+          const guardfilm = product.guardfilm;
+          const weight = product.weight;
+          const thickness =  product.thickness;
+          const width = product.width;
+          const length = product.length;
+          const pcs = product.pcs;
+          const rate=product.rate;
+
+          let stock_data = await stock.findOne({
+              product: product_name,
+              company: company,
+              grade: grade,
+              topcolor: topcolor,
+              coating: coating,
+              temper: temper,
+              guardfilm: guardfilm
+          });
+
+
+
+
+          if (stock_data && stock_data.weight >= weight) {
+
+              // Sufficient stock is available, update stock quantity
+              stock_data.weight -= weight;
+              await stock_data.save();
+          } 
+
+          else if (select_product == "GP Sheet") {
+            // Check stock availability for GP Sheet
+            stock_data = await stock.findOne({
+                product: "GP Sheet", // Check for GP Sheet availability
+                company,
+                grade,
+                topcolor,
+                coating,
+                temper,
+                guardfilm,
+            });
+        
+            if (stock_data && stock_data.weight >= weight) {
+                // GP Sheet is available
+                stock_data.weight -= weight;
+                await stock_data.save();
+                console.log(`Stock for GP Sheet found and updated.`);
+            } else {
+                // If GP Sheet is not available, check for GP Coil
+                console.log(`Stock for GP Sheet is insufficient. Checking for GP Coil...`);
+        
+                stock_data = await stock.findOne({
+                    product: "GP Coil", // Check for GP Coil availability
+                    company,
+                    grade,
+                    topcolor,
+                    coating,
+                    temper,
+                    guardfilm,
+                });
+        
+                if (stock_data && stock_data.weight >= weight) {
+                    // GP Coil is available, treat it as GP Sheet
+                    stock_data.weight -= weight;
+                    await stock_data.save();
+        
+                    console.log(
+                        `Ordered GP Coil as GP Sheet due to insufficient stock for GP Sheet.`
+                    );
+                  }
+
+                }
+              }
+          
+          else {
+              return res.status(404).json({ "status": 404, "msg": 'Order cannot be placed due to insufficient stock' });
+          }
+      }
+      
+
+      const browser = await puppeteer.launch({
+          headless: 'new', 
+          args: ['--no-sandbox'],// Set to true if you want to run iya n headless mode
+      });
+
+      const page = await browser.newPage();
+
+  const orderDetailsHTML = `
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Order Details</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              clifford: "#DA373D",
-            },
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            clifford: "#DA373D",
           },
         },
-      };
-    </script>
-    <style>
-      .form {
-        width: 800px;
-        margin: 40px auto;
-        padding: 20px;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      }
-      .header {
-        justify-content: space-evenly;
-        margin-bottom: 20px;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 20px;
-      }
-      .header label {
-        /* margin-right: 10px; */
-      }
-      .header input {
-        width: 150px;
-        height: 30px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-      }
-      .table {
-        margin-bottom: 20px;
-        width: 100%;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      th,
-      td {
-        border: 1px solid #ccc;
-        padding: 10px;
-        text-align: left;
-      }
-      th {
-        background-color: #F0F0F0;
-      }
-      .footer {
-        display: flex;
-        flex-direction: column;
-        justify-content: end;
-        align-items: end;
-        margin-top: 20px;
-      }
-      .Text {
-        border: none; /* Removes the border */
-        border-bottom: 1px solid black; /* Adds an underline */
-        width: 150px;
-        height: 30px;
-        padding: 10px;
-        outline: none; /* Removes the focus outline */
-      }
-      .parent-footer {
-        display: flex;
-        justify-content: space-between;
-      }
-      .footer label {
-        margin-right: 10px;
-      }
-      .footer input {
-        width: 150px;
-        height: 30px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-      }
-      .para1{
-        width: 40%;
-        margin-bottom: 20px;
-        font-weight: 600;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="form">
-      <div class="header flex flex-row justify-between">
-        <div>DC No.: ${req.body.dpPhone}</div>
-        <div class="flex flex-row items-center">
-          <div>Date: ${req.body.deliveryDate}</div>
-        </div>
+      },
+    };
+  </script>
+  <style>
+    .form {
+      width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      justify-content: space-evenly;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .header label {
+      /* margin-right: 10px; */
+    }
+    .header input {
+      width: 150px;
+      height: 30px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .table {
+      margin-bottom: 20px;
+      width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #F0F0F0;
+    }
+    .footer {
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      align-items: end;
+      margin-top: 20px;
+    }
+    .Text {
+      border: none; /* Removes the border */
+      border-bottom: 1px solid black; /* Adds an underline */
+      width: 150px;
+      height: 30px;
+      padding: 10px;
+      outline: none; /* Removes the focus outline */
+    }
+    .parent-footer {
+      display: flex;
+      justify-content: space-between;
+    }
+    .footer label {
+      margin-right: 10px;
+    }
+    .footer input {
+      width: 150px;
+      height: 30px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .para1{
+      width: 40%;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="form">
+    <div class="header flex flex-row justify-between">
+      <div>DC No.: ${req.body.dpPhone}</div>
+      <div class="flex flex-row items-center">
+        <div>Date: ${req.body.deliveryDate}</div>
       </div>
-      <div class="mb-3">
-        <div>
-          M/S: ${req.body.ms}
-          <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
-        </div>
-        <div>
-          Broker: ${req.body.broker}
-          <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
-        </div>
-        <div>
-          Vehicle No.: ${req.body.vehicleNum }
-          <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
-        </div>
-        <div>
-          Transport: ${req.body.transport}
-          <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
-        </div>
+    </div>
+    <div class="mb-3">
+      <div>
+        M/S: ${req.body.ms}
+        <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
       </div>
-      <div class="table">
-        <table>
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Thickness</th>
-              <th>Width</th>
-              <th>Length</th>
-              <th>Weight</th>
-              <th>Pcs</th>
-              <th>Rate</th>
-              <th>Product</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${req.body.products.map((product, index) => `
-            <tr>
-              <td>${index + 1}</td>
-              <td>${product.thickness}</td>
-              <td>${product.width}</td>
-              <td>${product.length}</td>
-              <td>${product.weight}</td>
-              <td>${product.pcs}</td>
-              <td>${product.rate}</td>
-              <td>${product.select_product}</td>
-            </tr>
-            `).join('')}
-          </tbody>
-        </table>
+      <div>
+        Broker: ${req.body.broker}
+        <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
       </div>
-      <div class="parent-footer">
-        <div class="para1 mb-4 ">
-          <p>
-            हमारे यहाँ से माल रुकवा एवं प्रीति प्रेषण किया गया है। ट्रक में
-            पर्ची लगने के उपरांत कर्ता की खपत होने की जवाबदारी हमारी नहीं होगी।
-          </p>
+      <div>
+        Vehicle No.: ${req.body.vehicleNum }
+        <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
+      </div>
+      <div>
+        Transport: ${req.body.transport}
+        <div class="border-b-2 border-black-900 w-80 mb-4 ml-20"></div>
+      </div>
+    </div>
+    <div class="table">
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Thickness</th>
+            <th>Width</th>
+            <th>Length</th>
+            <th>Weight</th>
+            <th>Pcs</th>
+            <th>Rate</th>
+            <th>Product</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${req.body.products.map((product, index) => `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${product.thickness}</td>
+            <td>${product.width}</td>
+            <td>${product.length}</td>
+            <td>${product.weight}</td>
+            <td>${product.pcs}</td>
+            <td>${product.rate}</td>
+            <td>${product.select_product}</td>
+          </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="parent-footer">
+      <div class="para1 mb-4 ">
+        <p>
+          हमारे यहाँ से माल रुकवा एवं प्रीति प्रेषण किया गया है। ट्रक में
+          पर्ची लगने के उपरांत कर्ता की खपत होने की जवाबदारी हमारी नहीं होगी।
+        </p>
+      </div>
+      <div class="footer">
+        <div class="font-bold">
+          Received by: ${req.body.Received_by}
+          <div class="w-50 mb-4 ml-20"></div>
         </div>
-        <div class="footer">
-          <div class="font-bold">
-            Received by: ${req.body.Received_by}
-            <div class="w-50 mb-4 ml-20"></div>
-          </div>
-          <div>
-            Name: ${req.body.clientName}
-            <div class="border-b-2 border-black-900 w-50 mb-4 ml-20"></div>
-          </div>
-          <div>
-            Mob. ${req.body.phone_no}
-            <div class="border-b-2 border-black-900 w-50 mb-4 ml-20"></div>
-          </div>
+        <div>
+          Name: ${req.body.clientName}
+          <div class="border-b-2 border-black-900 w-50 mb-4 ml-20"></div>
+        </div>
+        <div>
+          Mob. ${req.body.phone_no}
+          <div class="border-b-2 border-black-900 w-50 mb-4 ml-20"></div>
         </div>
       </div>
     </div>
-  </body>
+  </div>
+</body>
 </html>
 `;
 
 
+      
+      await page.setContent(orderDetailsHTML);
+
+      await page.pdf({ path: pdfPath, format: 'A4' });
+
+      await browser.close();
+      
+      // Create a read stream for the PDF file
+      const pdfReadStream = fileSystem.createReadStream(pdfPath);
+
+      const s3 = new AWS.S3({
+          accessKeyId: process.env.ACCESS_KEY_ID ,
+          secretAccessKey: process.env. SECRET_ACCESS_KEY,
+        });
         
-        await page.setContent(orderDetailsHTML);
+      const bucketName = 'vss-project';
 
-        await page.pdf({ path: pdfPath, format: 'A4' });
+      const uploadParams = {
+          Bucket: bucketName,
+          Key: `${orderId}.pdf`,
+          Body:pdfReadStream,  // Use fs.createReadStream here
+          ContentType: 'application/pdf',
+      };
 
-        await browser.close();
-        
-        // Create a read stream for the PDF file
-        const pdfReadStream = fileSystem.createReadStream(pdfPath);
+     await s3.upload(uploadParams).promise();
+      const params = {
+          Bucket: bucketName,
+          Key: `${orderId}.pdf`
+      };
 
-        const s3 = new AWS.S3({
-            accessKeyId: process.env.ACCESS_KEY_ID ,
-            secretAccessKey: process.env. SECRET_ACCESS_KEY,
-          });
-          
-        const bucketName = 'vss-project';
+  // Get signed URL for the uploaded PDF
+          const pdfURL = await s3.getSignedUrlPromise('getObject', params);
 
-        const uploadParams = {
-            Bucket: bucketName,
-            Key: `${orderId}.pdf`,
-            Body:pdfReadStream,  // Use fs.createReadStream here
-            ContentType: 'application/pdf',
-        };
+          console.log("pdfURL:" + pdfURL)
 
-       await s3.upload(uploadParams).promise();
-        const params = {
-            Bucket: bucketName,
-            Key: `${orderId}.pdf`
-        };
-
-    // Get signed URL for the uploaded PDF
-            const pdfURL = await s3.getSignedUrlPromise('getObject', params);
-
-            console.log("pdfURL:" + pdfURL)
-
-        // Set pdf_order data as the S3 URL
-        user.pdf_url = pdfURL;
+      // Set pdf_order data as the S3 URL
+      user.pdf_url = pdfURL;
 
 
-        // Ensure pdf_order is an object with type and data properties
-        if (!user.pdf_order || typeof user.pdf_order !== 'object') {
-            user.pdf_order = {
-                type: 'application/pdf',
-                data: null,
-            };
-        } else {
-            // If pdf_order is already an object, ensure it has the required properties
-            user.pdf_order.type = 'application/pdf';
-            user.pdf_order.data = null;
-        }
+      // Ensure pdf_order is an object with type and data properties
+      if (!user.pdf_order || typeof user.pdf_order !== 'object') {
+          user.pdf_order = {
+              type: 'application/pdf',
+              data: null,
+          };
+      } else {
+          // If pdf_order is already an object, ensure it has the required properties
+          user.pdf_order.type = 'application/pdf';
+          user.pdf_order.data = null;
+      }
 
-        // Set pdf_order data as the path to the saved PDF file
-        user.pdf_order.data = pdfPath;
-        
+      // Set pdf_order data as the path to the saved PDF file
+      user.pdf_order.data = pdfPath;
+      
 
-        // Save the new sales order
-        const newOrder = await user.save({ select: '-pdf_order' });
-        
-      // Remove pdf_order from the newOrder object
+      // Save the new sales order
+      const newOrder = await user.save({ select: '-pdf_order' });
+      
+    // Remove pdf_order from the newOrder object
 if (newOrder.pdf_order) {
-    newOrder.pdf_order = undefined;
+  newOrder.pdf_order = undefined;
 }
 
 // Send the response with the newOrder object
 return res.status(201).json({
-    status: 201,
-    msg: 'Order successfully created',
-    newOrder,
+  status: 201,
+  msg: 'Order successfully created',
+  newOrder,
 });
 
-    } catch (err) {
-        console.log(err);
-        res.status(400).json({ "status": 400, "message": "Something Went Wrong" , error:err.message});
-    }
+  } catch (err) {
+      console.log(err);
+      res.status(400).json({ "status": 400, "message": "Something Went Wrong" , error:err.message});
+  }
 };
 
 

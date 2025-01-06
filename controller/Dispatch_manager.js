@@ -141,13 +141,11 @@ exports.RecivedOrder = async (req, res) => {
   try {
 
     const orderId = req.query.orderId;
-
     const TotalWeight = req.query.dpTotalWeight
 
     let current_date = req.query.dpDate || moment().format('YYYY-MM-DD HH:mm:ss');
 
     const dpRecieved = req.query.dpRecieved;
-
 
     // Check if the order is marked as 'Complete'
     const order = await SalesManager.findOne({ orderId, Order_mark: 'Complete', TotalWeight, dpRecieved, current_date });
