@@ -978,6 +978,7 @@ exports.checkStocks = async (req, res) => {
 
 
     if(product == "GP Sheet"){
+      console.log("GP Sheet")
       return res.status(200).json({
         isAvailable: 'True',
         status: 200,
