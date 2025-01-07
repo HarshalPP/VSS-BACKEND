@@ -532,7 +532,7 @@ exports.create = async (req, res) => {
               await stock_data.save();
           } 
 
-          else if (select_product == "GP Sheet") {
+          else if (product.select_product == "GP Sheet") {
             // Check stock availability for GP Sheet
             stock_data = await stock.findOne({
                 product: "GP Sheet", // Check for GP Sheet availability
