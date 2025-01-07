@@ -976,17 +976,6 @@ exports.checkStocks = async (req, res) => {
     if (width) query.width = width;
 
 
-
-    if(product == "GP Sheet"){
-      console.log("GP Sheet")
-      return res.status(200).json({
-        isAvailable: 'True',
-        status: 200,
-        message: "Stock Available",
-        filteredData,
-      })
-    }
-
     // Query the database using the constructed query object
     const filteredData = await stock.findOne(query);
 
