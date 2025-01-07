@@ -10,7 +10,7 @@ router.get("/get/:id", token, salesController.get);
 
 router.get("/availableStock", token, salesController.availableStock);
 
-router.get("/checkStock",  salesController.checkStocks);
+router.post("/checkStock",  salesController.checkStocks);
 
 
 
