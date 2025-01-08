@@ -979,6 +979,27 @@ exports.checkStocks = async (req, res) => {
     // Query the database using the constructed query object
     const filteredData = await stock.findOne(query);
 
+
+    if(!filteredData && product == "GP Sheet"){
+      const filteredData = await stock.findOne({
+        product: "GP Coil",
+        company: company,
+        grade: grade,
+        topcolor: topcolor,
+        coating: coating,
+        temper: temper,
+        guardfilm: guardfilm
+      });
+
+      return res.status(200).json({
+        isAvailable: 'True',
+        status: 200,
+        message: "Stock Available",
+        filteredData,
+      })
+    }
+
+
     // if product is GP Coil so do unot use a check //
 
     // Check if the filtered data is null
