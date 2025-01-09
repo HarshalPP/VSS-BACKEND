@@ -529,7 +529,7 @@ exports.create = async (req, res) => {
 
               // Sufficient stock is available, update stock quantity
               stock_data.weight -= weight;
-              await stock_data.save();
+              await stock_data.save();             
           } 
 
           else if (product.select_product == "GP Sheet") {
@@ -543,8 +543,9 @@ exports.create = async (req, res) => {
                 temper,
                 guardfilm,
             });
-        
+
             if (stock_data && stock_data.weight >= weight) {
+              console.log(`Stock for GP Sheet found and updated.` , stock_data.weight);
                 // GP Sheet is available
                 stock_data.weight -= weight;
                 await stock_data.save();
@@ -562,6 +563,9 @@ exports.create = async (req, res) => {
                     temper,
                     guardfilm,
                 });
+
+                console.log("stock weight" , stock_data.weight)
+                console.log("weight" , weight)
         
                 if (stock_data && stock_data.weight >= weight) {
                     // GP Coil is available, treat it as GP Sheet
@@ -575,6 +579,9 @@ exports.create = async (req, res) => {
 
                 }
               }
+
+
+              // 
           
           else {
               return res.status(404).json({ "status": 404, "msg": 'Order cannot be placed due to insufficient stock' });
@@ -988,8 +995,19 @@ exports.checkStocks = async (req, res) => {
         topcolor: topcolor,
         coating: coating,
         temper: temper,
-        guardfilm: guardfilm
+        guardfilm: guardfilm,
+        thickness: thickness,
+        width: width
       });
+
+          // Check if the weight is less than the available weight
+    if (filteredData.weight < req.body.weight) {
+      return res.status(400).json({
+        isAvailable: 'False',
+        status: 400,
+        message: "We have stock, but not a sufficient weight",
+      });
+    }
 
       return res.status(200).json({
         isAvailable: 'True',
@@ -1010,6 +1028,7 @@ exports.checkStocks = async (req, res) => {
         message: "Out Of Stock",
       });
     }
+
 
     // Check if the weight is less than the available weight
     if (filteredData.weight < req.body.weight) {
