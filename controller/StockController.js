@@ -102,6 +102,7 @@ function generateBatchNumber() {
 exports.create = async (req, res) => {
   const qwe = req.body;
 
+
   try {
     // Check if the stock already exists
     const existingStock = await Production_incharge.findOne({
@@ -113,8 +114,7 @@ exports.create = async (req, res) => {
       temper: qwe.temper,
       guardfilm: qwe.guardfilm,
       thickness: qwe.thickness,
-      width: qwe.width,
-      length: qwe.length,
+      width: qwe.width
     });
 
     if (!existingStock) {
@@ -148,9 +148,11 @@ exports.create = async (req, res) => {
         weight: qwe.weight,
       };
 
+
       existingStock.batch_number.push(newBatchNumber); // Optional: Maintain batch numbers separately
       existingStock.batch_details.push(newBatch); // Add the new batch details
       existingStock.weight += qwe.weight; // Update total weight
+      existingStock.length += qwe.length; // Update total length
 
       await existingStock.save();
 
