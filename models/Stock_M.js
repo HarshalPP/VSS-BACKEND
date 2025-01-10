@@ -15,6 +15,12 @@ const productionSchema = new Schema({
     weight: Number,
     approx_weight:Number,
     batch_number: [String],
+    batch_details: [
+        {
+          batchNumber: String,
+          weight: Number,
+        },
+    ],
     ready_production: String,
     vehical_no: String,
     vendor: String,

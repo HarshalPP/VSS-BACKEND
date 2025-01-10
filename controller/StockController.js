@@ -4,93 +4,172 @@ const createMoment=moment()
 
 
 // create the Stocks //
-exports.create = async (req, res) => {
-  const qwe = req.body;
+// exports.create = async (req, res) => {
+//   const qwe = req.body;
 
-  try {
-    const existingStock = await Production_incharge.findOne({
-      $and: [
-        {
-          product: qwe.product,
-          company: qwe.company,
-          grade: qwe.grade,
-          topcolor: qwe.topcolor,
-          coating: qwe.coating,
-          temper: qwe.temper,
-          guardfilm: qwe.guardfilm,
-          thickness: qwe.thickness,
-          width: qwe.width,
-          length: qwe.length,
-          pcs: qwe.pcs,
-        },
-      ],
-    });
+//   try {
+//     const existingStock = await Production_incharge.findOne({
+//       $and: [
+//         {
+//           product: qwe.product,
+//           company: qwe.company,
+//           grade: qwe.grade,
+//           topcolor: qwe.topcolor,
+//           coating: qwe.coating,
+//           temper: qwe.temper,
+//           guardfilm: qwe.guardfilm,
+//           thickness: qwe.thickness,
+//           width: qwe.width,
+//           length: qwe.length,
+//           pcs: qwe.pcs,
+//         },
+//       ],
+//     });
 
-    if (!existingStock) {
-      // Stock doesn't exist, create a new entry for the first batch
-      const newBatchNumber = generateBatchNumber();
+//     if (!existingStock) {
+//       // Stock doesn't exist, create a new entry for the first batch
+//       const newBatchNumber = generateBatchNumber();
 
-      const newStock = new Production_incharge({
-        ...qwe,
-        weight: qwe.weight,
-        batch_number: [newBatchNumber], // Include the new batch number
-        Date:createMoment.format("YYYY-MM-DD HH:mm:ss")
-      });
-      const savedStock = await newStock.save();
+//       const newStock = new Production_incharge({
+//         ...qwe,
+//         weight: qwe.weight,
+//         batch_number: [newBatchNumber], // Include the new batch number
+//         Date:createMoment.format("YYYY-MM-DD HH:mm:ss")
+//       });
+//       const savedStock = await newStock.save();
 
-      res.status(201).json({
-        status: 200, 
-        msg: "Successfully created",
-        newStock: {
-          stockData: savedStock,
-          batches: [{ batchNumber: newBatchNumber, originalWeight: qwe.weight, stockData: savedStock }],
-        },
-      });
-    } else {
-      // Stock already exists
-      console.log("Stock Already Existed");
-      const newBatchNumber = generateBatchNumber();
+//       res.status(201).json({
+//         status: 200, 
+//         msg: "Successfully created",
+//         newStock: {
+//           stockData: savedStock,
+//           batches: [{ batchNumber: newBatchNumber, originalWeight: qwe.weight, stockData: savedStock }],
+//         },
+//       });
+//     } else {
+//       // Stock already exists
+//       console.log("Stock Already Existed");
+//       const newBatchNumber = generateBatchNumber();
 
-      existingStock.batch_number.push(newBatchNumber); // Add the new batch number to existing batch numbers
+//       existingStock.batch_number.push(newBatchNumber); // Add the new batch number to existing batch numbers
 
-      // Create a new instance for the new batch
-      const newStockBatch = new Production_incharge({
-        ...qwe,
-        weight: qwe.weight,
-        batch_number: [newBatchNumber], // Include the new batch number
-      });
+//       // Create a new instance for the new batch
+//       const newStockBatch = new Production_incharge({
+//         ...qwe,
+//         weight: qwe.weight,
+//         batch_number: [newBatchNumber], // Include the new batch number
+//       });
 
-      const savedStockBatch = await newStockBatch.save();
+//       const savedStockBatch = await newStockBatch.save();
 
-      // Update the weight of the existing stock
-      existingStock.weight += qwe.weight;
+//       // Update the weight of the existing stock
+//       existingStock.weight += qwe.weight;
 
-      res.status(201).json({
-        status: 200,
-        msg: "Stock updated with new batch_number",
-        existingStock: {
-          stockData: existingStock,
-          batches: existingStock.batch_number.map((batch) => ({
-            batchNumber: batch.batchNumber,
-            originalWeight: batch.weight,
-            stockData: { ...existingStock.toObject(), weight: batch.weight },
-          })),
-        },
-        newStock: {
-          stockData: savedStockBatch,
-          batches: [{ batchNumber: newBatchNumber, originalWeight: qwe.weight, stockData: savedStockBatch }],
-        },
-      });
-    }
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-};
+//       res.status(201).json({
+//         status: 200,
+//         msg: "Stock updated with new batch_number",
+//         existingStock: {
+//           stockData: existingStock,
+//           batches: existingStock.batch_number.map((batch) => ({
+//             batchNumber: batch.batchNumber,
+//             originalWeight: batch.weight,
+//             stockData: { ...existingStock.toObject(), weight: batch.weight },
+//           })),
+//         },
+//         newStock: {
+//           stockData: savedStockBatch,
+//           batches: [{ batchNumber: newBatchNumber, originalWeight: qwe.weight, stockData: savedStockBatch }],
+//         },
+//       });
+//     }
+//   } catch (err) {
+//     res.status(400).json({ message: err.message });
+//   }
+// };
 
+// function generateBatchNumber() {
+//   const uniqueIdentifier = Date.now();
+//   return `batch-${uniqueIdentifier}`;
+// }
+
+
+// Function to generate a unique batch number
 function generateBatchNumber() {
   const uniqueIdentifier = Date.now();
   return `batch-${uniqueIdentifier}`;
 }
+
+exports.create = async (req, res) => {
+  const qwe = req.body;
+
+  try {
+    // Check if the stock already exists
+    const existingStock = await Production_incharge.findOne({
+      product: qwe.product,
+      company: qwe.company,
+      grade: qwe.grade,
+      topcolor: qwe.topcolor,
+      coating: qwe.coating,
+      temper: qwe.temper,
+      guardfilm: qwe.guardfilm,
+      thickness: qwe.thickness,
+      width: qwe.width,
+      length: qwe.length,
+    });
+
+    if (!existingStock) {
+      // Stock doesn't exist, create a new entry
+      const newBatchNumber = generateBatchNumber();
+      const newBatch = {
+        batchNumber: newBatchNumber,
+        weight: qwe.weight,
+      };
+
+      const newStock = new Production_incharge({
+        ...qwe,
+        weight: qwe.weight, // Total weight
+        batch_number: [newBatchNumber],
+        batch_details: [newBatch], // Track batch details
+        Date: moment().format("YYYY-MM-DD HH:mm:ss"),
+      });
+
+      const savedStock = await newStock.save();
+
+      res.status(201).json({
+        status: 200,
+        msg: "Successfully created",
+        newStock: savedStock,
+      });
+    } else {
+      // Stock already exists, update the existing record
+      const newBatchNumber = generateBatchNumber();
+      const newBatch = {
+        batchNumber: newBatchNumber,
+        weight: qwe.weight,
+      };
+
+      existingStock.batch_number.push(newBatchNumber); // Optional: Maintain batch numbers separately
+      existingStock.batch_details.push(newBatch); // Add the new batch details
+      existingStock.weight += qwe.weight; // Update total weight
+
+      await existingStock.save();
+
+      res.status(200).json({
+        status: 200,
+        msg: "Stock updated with new batch_number",
+        updatedStock: {
+          stockData: existingStock,
+          // batches: existingStock.batch_details, // Include batch-specific weights
+        },
+      });
+    }
+  } catch (err) {
+    // Handle errors
+    res.status(400).json({ message: err.message });
+  }
+};
+
+
 
 
 
