@@ -48,6 +48,70 @@ exports.getstocksdata = async (req, res) => {
 
 
 
+// exports.editStocks = async (req, res) => {
+//   try {
+//     const batchNumbers = req.params.batch_number.split(',');
+
+//     // Find all stocks with the given batch_numbers
+//     const findDataArray = await stocks.find({ batch_number: { $in: batchNumbers } });
+
+//     if (!findDataArray || findDataArray.length === 0) {
+//       return res.status(400).json({
+//         message: 'No matching data found',
+//       });
+//     }
+
+//     const requestedWeight = req.body.weight;
+
+//     for (const findData of findDataArray) {
+//       const existingWeight = findData.weight;
+
+//       if (requestedWeight > existingWeight) {
+//         return res.status(400).json({
+//           message: 'Requested weight exceeds existing stock weight',
+//         });
+//       }
+
+//       const remainingWeight = existingWeight - requestedWeight;
+
+//       // Update the 'weight' field with the remaining weight and keep all other properties
+//       const updatedData = await stocks.findOneAndUpdate(
+//         { _id: findData._id },
+//         { $set: { weight: remainingWeight } },
+//         { new: true }
+//       );
+//       console.log("new updated data", updatedData)
+
+//       // Create a new batch_number
+//       const newBatchNumber = `batch-${Date.now()}`;
+
+//       // Create a new stocks entry with the same properties, the provided weight, and the new batch_number
+//       const newStocksRecord = new stocks({
+//         ...findData.toObject(),
+//         _id: undefined,
+//         weight: requestedWeight,
+//         batch_number: newBatchNumber,
+//       });
+
+//       // Save the new stocks record
+//       await newStocksRecord.save();
+
+//       console.log("new stocks is ", newStocksRecord)
+//         // After the loop, send the response once
+//     res.status(200).json({
+//       message: 'Stocks updated successfully',
+//       newbatchNumber:newStocksRecord
+//     });
+//     }
+
+//   } catch (error) {
+//     res.status(500).json({
+//       error: error.message,
+//     });
+//   }
+// };
+
+
 exports.editStocks = async (req, res) => {
   try {
     const batchNumbers = req.params.batch_number.split(',');
@@ -55,56 +119,46 @@ exports.editStocks = async (req, res) => {
     // Find all stocks with the given batch_numbers
     const findDataArray = await stocks.find({ batch_number: { $in: batchNumbers } });
 
+    console.log("findDataArray", findDataArray);
+
     if (!findDataArray || findDataArray.length === 0) {
       return res.status(400).json({
         message: 'No matching data found',
       });
     }
 
-    const requestedWeight = req.body.weight;
+    const requestedWeight = req.body.weight; // Total weight requested
 
     for (const findData of findDataArray) {
       const existingWeight = findData.weight;
 
+      // Validate requested weight
       if (requestedWeight > existingWeight) {
         return res.status(400).json({
-          message: 'Requested weight exceeds existing stock weight',
+          message: `Requested weight (${requestedWeight} kg) exceeds available stock weight (${existingWeight} kg) for batch ${findData.batch_number}`,
         });
       }
 
+      // Calculate the remaining weight for the original stock
       const remainingWeight = existingWeight - requestedWeight;
 
-      // Update the 'weight' field with the remaining weight and keep all other properties
+      // Update the original stock's weight
       const updatedData = await stocks.findOneAndUpdate(
         { _id: findData._id },
         { $set: { weight: remainingWeight } },
         { new: true }
       );
-      console.log("new updated data", updatedData)
 
-      // Create a new batch_number
-      const newBatchNumber = `batch-${Date.now()}`;
+      console.log("Updated stock:", updatedData);
 
-      // Create a new stocks entry with the same properties, the provided weight, and the new batch_number
-      const newStocksRecord = new stocks({
-        ...findData.toObject(),
-        _id: undefined,
-        weight: requestedWeight,
-        batch_number: newBatchNumber,
+      // Send a success response after processing
+      return res.status(200).json({
+        message: 'Stock weight updated successfully',
+        updatedStock: updatedData,
       });
-
-      // Save the new stocks record
-      await newStocksRecord.save();
-
-      console.log("new stocks is ", newStocksRecord)
-        // After the loop, send the response once
-    res.status(200).json({
-      message: 'Stocks updated successfully',
-      newbatchNumber:newStocksRecord
-    });
     }
-
   } catch (error) {
+    console.error("Error updating stocks:", error);
     res.status(500).json({
       error: error.message,
     });

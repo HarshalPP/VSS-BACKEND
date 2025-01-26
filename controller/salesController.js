@@ -528,9 +528,14 @@ exports.create = async (req, res) => {
           if (stock_data && stock_data.weight >= weight) {
 
               // Sufficient stock is available, update stock quantity
-              stock_data.weight -= weight;
+              // stock_data.weight -= weight;
               await stock_data.save();             
           } 
+          
+
+          
+
+          
 
           else if (product.select_product == "GP Sheet") {
             // Check stock availability for GP Sheet
@@ -545,9 +550,8 @@ exports.create = async (req, res) => {
             });
 
             if (stock_data && stock_data.weight >= weight) {
-              console.log(`Stock for GP Sheet found and updated.` , stock_data.weight);
                 // GP Sheet is available
-                stock_data.weight -= weight;
+                // stock_data.weight -= weight;
                 await stock_data.save();
                 console.log(`Stock for GP Sheet found and updated.`);
             } else {
@@ -564,12 +568,11 @@ exports.create = async (req, res) => {
                     guardfilm,
                 });
 
-                console.log("stock weight" , stock_data.weight)
-                console.log("weight" , weight)
+     
         
                 if (stock_data && stock_data.weight >= weight) {
                     // GP Coil is available, treat it as GP Sheet
-                    stock_data.weight -= weight;
+                    // stock_data.weight -= weight;
                     await stock_data.save();
         
                     console.log(
@@ -577,16 +580,133 @@ exports.create = async (req, res) => {
                     );
                   }
 
+                  else{
+                    return res.status(404).json({ "status": 404, "msg": 'order can not be placed due to insufficient stock' });
+                  }
+
                 }
               }
 
 
-              // 
+              else if (product.select_product == "Profile Sheet") {
+                // Check stock availability for GP Sheet
+                stock_data = await stock.findOne({
+                    product: "Profile Sheet", // Check for GP Sheet availability
+                    company,
+                    grade,
+                    topcolor,
+                    coating,
+                    temper,
+                    guardfilm,
+                });
+    
+                if (stock_data && stock_data.weight >= weight) {
+
+
+                    // GP Sheet is available
+                    // stock_data.weight -= weight;
+                    await stock_data.save();
+                    console.log(`Stock for GP Sheet found and updated.`);
+                } else {
+                    // If GP Sheet is not available, check for GP Coil
+                    console.log(`Stock for GP Sheet is insufficient. Checking for GP Coil...`);
+            
+                    stock_data = await stock.findOne({
+                        product: "Color Coil", // Check for GP Coil availability
+                        company,
+                        grade,
+                        topcolor,
+                        coating,
+                        temper,
+                        guardfilm,
+                    });
+
+                    console.log("stock weight" , stock_data)
+
+        
+
+  
+            
+                    if (stock_data && stock_data.weight >= weight) {
+                        // GP Coil is available, treat it as GP Sheet
+                        // stock_data.weight -= weight;
+                        await stock_data.save();
+            
+                        console.log(
+                            `Ordered GP Coil as GP Sheet due to insufficient stock for GP Sheet.`
+                        );
+                      }
+
+                      else{
+                        return res.status(404).json({ "status": 404, "msg": 'order can not be placed due to insufficient stock' });
+                      }
+    
+                    }
+                  }
+
+
+                  else if (product.select_product == "GC sheet") {
+                    // Check stock availability for GP Sheet
+                    stock_data = await stock.findOne({
+                        product: "GC sheet", // Check for GP Sheet availability
+                        company,
+                        grade,
+                        topcolor,
+                        coating,
+                        temper,
+                        guardfilm,
+                    });
+        
+                    if (stock_data && stock_data.weight >= weight) {
+    
+    
+                        // GP Sheet is available
+                        // stock_data.weight -= weight;
+                        await stock_data.save();
+                        console.log(`Stock for GP Sheet found and updated.`);
+                    } else {
+                        // If GP Sheet is not available, check for GP Coil
+                        console.log(`Stock for GP Sheet is insufficient. Checking for GP Coil...`);
+                
+                        stock_data = await stock.findOne({
+                            product: "GC coil", // Check for GP Coil availability
+                            company,
+                            grade,
+                            topcolor,
+                            coating,
+                            temper,
+                            guardfilm,
+                        });
+      
+                
+                        if (stock_data && stock_data.weight >= weight) {
+                            // GP Coil is available, treat it as GP Sheet
+                            // stock_data.weight -= weight;
+                            await stock_data.save();
+                
+                            console.log(
+                                `Ordered GP Coil as GP Sheet due to insufficient stock for GP Sheet.`
+                            );
+                          }
+
+                          else{
+                            return res.status(404).json({ "status": 404, "msg": 'order can not be placed due to insufficient stock' });
+                          }
+        
+                        }
+                      }
+
+                      if(stock_data.weight < weight){
+                        return res.status(404).json({ "status": 404, "msg": 'order can not be placed due to insufficient stock' });
+                      }
+
+
+                      if(!stock_data){
+                        return res.status(404).json({ "status": 404, "msg": 'Stock not available' });
+                      }
           
-          else {
-              return res.status(404).json({ "status": 404, "msg": 'Order cannot be placed due to insufficient stock' });
-          }
       }
+
       
 
       const browser = await puppeteer.launch({
@@ -976,19 +1096,18 @@ exports.checkStocks = async (req, res) => {
     if (company) query.company = company;
     if (grade) query.grade = grade;
     if (topcolor) query.topcolor = topcolor;
-    if (coating) query.coating = coating; // Convert 'coating' to a number
+    if (coating) query.coating = coating;
     if (temper) query.temper = temper;
     if (guardfilm) query.guardfilm = guardfilm;
     if (thickness) query.thickness = thickness;
     if (width) query.width = width;
 
-
     // Query the database using the constructed query object
-    const filteredData = await stock.findOne(query);
+    let filteredData = await stock.findOne(query);
 
-
-    if(!filteredData && product == "GP Sheet"){
-      const filteredData = await stock.findOne({
+    // Check alternative products if filteredData is null and product is "GP Sheet"
+    if (!filteredData && product === "GP Sheet") {
+      filteredData = await stock.findOne({
         product: "GP Coil",
         company: company,
         grade: grade,
@@ -997,30 +1116,28 @@ exports.checkStocks = async (req, res) => {
         temper: temper,
         guardfilm: guardfilm,
         thickness: thickness,
-        width: width
-      });
-
-          // Check if the weight is less than the available weight
-    if (filteredData.weight < req.body.weight) {
-      return res.status(400).json({
-        isAvailable: 'False',
-        status: 400,
-        message: "We have stock, but not a sufficient weight",
+        width: width,
       });
     }
 
-      return res.status(200).json({
-        isAvailable: 'True',
-        status: 200,
-        message: "Stock Available",
-        filteredData,
-      })
+    // Check alternative products if filteredData is null and product is "Profile Sheet"
+    if (!filteredData && product === "Profile Sheet") {
+      console.log("Checking for Profile Sheet");
+      filteredData = await stock.findOne({
+        product: "GC Coil",
+        company: company,
+        grade: grade,
+        topcolor: topcolor,
+        coating: coating,
+        temper: temper,
+        guardfilm: guardfilm,
+        thickness: thickness,
+        width: width,
+      });
     }
 
 
-    // if product is GP Coil so do unot use a check //
-
-    // Check if the filtered data is null
+    // If no data is found, return "Out Of Stock"
     if (!filteredData) {
       return res.status(400).json({
         isAvailable: 'False',
@@ -1030,7 +1147,7 @@ exports.checkStocks = async (req, res) => {
     }
 
 
-    // Check if the weight is less than the available weight
+    // Check if the requested weight exceeds the available weight
     if (filteredData.weight < req.body.weight) {
       return res.status(400).json({
         isAvailable: 'False',
@@ -1041,7 +1158,6 @@ exports.checkStocks = async (req, res) => {
 
     // Check that every provided field matches in the filtered data
     const hasAllFields = [
-      !product || filteredData.product === product,
       !company || filteredData.company === company,
       !grade || filteredData.grade === grade,
       !topcolor || filteredData.topcolor === topcolor,
@@ -1049,7 +1165,6 @@ exports.checkStocks = async (req, res) => {
       !guardfilm || filteredData.guardfilm === guardfilm,
       !thickness || filteredData.thickness === thickness,
       !width || filteredData.width === width
-
     ].every(Boolean); // Ensure all conditions are true
 
     // If any required field is not matching, return "Out Of Stock"
@@ -1076,6 +1191,7 @@ exports.checkStocks = async (req, res) => {
     });
   }
 };
+
 
 
 
