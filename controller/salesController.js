@@ -1012,6 +1012,7 @@ exports.availableStock = async (req, res) => {
 
     // Query the database using the constructed query object
     let filteredData = await stock.findOne(query);
+    console.log("Filtered Data:", filteredData);
 
     // Check alternative products if filteredData is null
     if (!filteredData && product === "GP Sheet") {
@@ -1077,30 +1078,6 @@ exports.availableStock = async (req, res) => {
       });
     }
 
-    // Check that every provided field matches in the filtered data
-    const hasAllFields = [
-      !product || filteredData.product === product,
-      !company || filteredData.company === company,
-      !grade || filteredData.grade === grade,
-      !topcolor || filteredData.topcolor === topcolor,
-      !coating || filteredData.coating === parseInt(coating, 10),
-      !temper || filteredData.temper === temper,
-      !guardfilm || filteredData.guardfilm === guardfilm,
-      !thickness || filteredData.thickness === thickness,
-      !width || filteredData.width === width,
-      !weight || parseFloat(weight) <= filteredData.weight,
-    ].every(Boolean);
-
-    console.log(hasAllFields, "Field Matching Status");
-
-    // If any required field is not matching, return "Out Of Stock"
-    if (!hasAllFields) {
-      return res.status(400).json({
-        isAvailable: 'False',
-        status: 400,
-        message: "Out Of Stock",
-      });
-    }
 
     // If all fields exist and match, return the available stock data
     return res.status(200).json({
