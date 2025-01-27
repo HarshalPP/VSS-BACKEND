@@ -989,68 +989,116 @@ exports.availableStock = async (req, res) => {
       company,
       grade,
       topcolor,
-      coating, // Passing 'coating' directly
+      coating,
       temper,
       guardfilm,
       thickness,
-      width
+      width,
+      weight,
     } = req.query;
 
     // Construct a query object based on the provided parameters
     const query = {};
-  
 
-    // Add properties to the query object only if they are provided
     if (product) query.product = product;
     if (company) query.company = company;
     if (grade) query.grade = grade;
     if (topcolor) query.topcolor = topcolor;
-    if (coating) query.coating = coating // Convert 'coating' to a number
+    if (coating) query.coating = parseInt(coating, 10); // Ensure 'coating' is a number
     if (temper) query.temper = temper;
     if (guardfilm) query.guardfilm = guardfilm;
-    if(thickness) query.thickness = thickness;
-    if(width) query.width = width;
-
+    if (thickness) query.thickness = thickness;
+    if (width) query.width = width;
 
     // Query the database using the constructed query object
-    const filteredData = await stock.findOne(query);
-    // Check if the filtered data is null
+    let filteredData = await stock.findOne(query);
+
+    // Check alternative products if filteredData is null
+    if (!filteredData && product === "GP Sheet") {
+      console.log("Checking for GP Coil");
+      filteredData = await stock.findOne({
+        product: "GP Coil",
+        company: company,
+        grade: grade,
+        topcolor: topcolor,
+        coating: parseInt(coating, 10),
+        temper: temper,
+        guardfilm: guardfilm,
+        thickness: thickness,
+        width: width,
+      });
+    }
+
+    if (!filteredData && product === "Profile Sheet") {
+      console.log("Checking for Color Coil");
+      filteredData = await stock.findOne({
+        product: "Color Coil",
+        company: company,
+        grade: grade,
+        topcolor: topcolor,
+        coating: parseInt(coating, 10),
+        temper: temper,
+        guardfilm: guardfilm,
+        thickness: thickness,
+        width: width,
+      });
+    }
+
+    if (!filteredData && product === "GC Sheet") {
+      console.log("Checking for GC Coil");
+      filteredData = await stock.findOne({
+        product: "GC Coil",
+        company: company,
+        grade: grade,
+        topcolor: topcolor,
+        coating: parseInt(coating, 10),
+        temper: temper,
+        guardfilm: guardfilm,
+        thickness: thickness,
+        width: width,
+      });
+    }
+
+    // If still no data found, return out of stock
     if (!filteredData) {
       return res.status(400).json({
         isAvailable: 'False',
         status: 400,
-        message: "Out Of Stock"
+        message: "Out Of Stock",
       });
     }
 
-    // also check if weight is lessthen to avaiable weight so that we can check the stock is available or not
-
-    if (filteredData.weight < req.query.weight) {
+    // Check if weight is provided and exceeds the available stock weight
+    if (weight && parseFloat(weight) > filteredData.weight) {
       return res.status(400).json({
         isAvailable: 'False',
         status: 400,
-        message: "We have stock , but not a sufficient weight"})
-
-      }
+        message: "We have stock, but not a sufficient weight",
+      });
+    }
 
     // Check that every provided field matches in the filtered data
     const hasAllFields = [
-      !product || filteredData.product == product,
-      !company || filteredData.company == company,
-      !grade || filteredData.grade == grade,
-      !topcolor || filteredData.topcolor == topcolor,
-      !temper || filteredData.temper == temper,
-      !guardfilm || filteredData.guardfilm == guardfilm,
-    ].every(Boolean); // Ensure all conditions are true
+      !product || filteredData.product === product,
+      !company || filteredData.company === company,
+      !grade || filteredData.grade === grade,
+      !topcolor || filteredData.topcolor === topcolor,
+      !coating || filteredData.coating === parseInt(coating, 10),
+      !temper || filteredData.temper === temper,
+      !guardfilm || filteredData.guardfilm === guardfilm,
+      !thickness || filteredData.thickness === thickness,
+      !width || filteredData.width === width,
+      !weight || parseFloat(weight) <= filteredData.weight,
+    ].every(Boolean);
 
-    console.log(hasAllFields, "hasAllFields-------");
+    console.log(hasAllFields, "Field Matching Status");
 
     // If any required field is not matching, return "Out Of Stock"
     if (!hasAllFields) {
       return res.status(400).json({
         isAvailable: 'False',
         status: 400,
-        message: "Out Of Stock"
+        message: "Out Of Stock",
       });
     }
 
@@ -1059,17 +1107,18 @@ exports.availableStock = async (req, res) => {
       isAvailable: 'True',
       status: 200,
       message: "Stock Available",
-      filteredData
+      filteredData,
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Error in availableStock:", error);
     return res.status(500).json({
       status: 500,
-      message: "Something Went Wrong"
+      message: "Something Went Wrong",
     });
   }
 };
+
 
 
 
