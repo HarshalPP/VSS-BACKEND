@@ -1124,6 +1124,21 @@ exports.checkStocks = async (req, res) => {
     if (!filteredData && product === "Profile Sheet") {
       console.log("Checking for Profile Sheet");
       filteredData = await stock.findOne({
+        product: "Color Coil",
+        company: company,
+        grade: grade,
+        topcolor: topcolor,
+        coating: coating,
+        temper: temper,
+        guardfilm: guardfilm,
+        thickness: thickness,
+        width: width,
+      });
+    }
+
+    if(!filteredData && product === "GC sheet"){
+      console.log("Checking for GC sheet");
+      filteredData = await stock.findOne({
         product: "GC Coil",
         company: company,
         grade: grade,
