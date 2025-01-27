@@ -669,7 +669,7 @@ exports.create = async (req, res) => {
                         console.log(`Stock for GP Sheet is insufficient. Checking for GP Coil...`);
                 
                         stock_data = await stock.findOne({
-                            product: "GC coil", // Check for GP Coil availability
+                            product: "GC Coil", // Check for GP Coil availability
                             company,
                             grade,
                             topcolor,
