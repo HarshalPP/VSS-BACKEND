@@ -1162,7 +1162,7 @@ exports.checkStocks = async (req, res) => {
       });
     }
 
-    if(!filteredData && product === "GC sheet"){
+    if(!filteredData && product === "GC Sheet"){
       console.log("Checking for GC sheet");
       filteredData = await stock.findOne({
         product: "GC Coil",
