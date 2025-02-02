@@ -166,6 +166,50 @@ exports.editStocks = async (req, res) => {
 };
 
 
+exports.checkBatchWeight = async (req, res) => {
+  try {
+    const batch_numbers = req.params.batch_number.split(","); // Array of batch numbers
+    const requestedWeight = req.body.weight;
+
+    // Find stock entries that contain the given batch numbers
+    const stockEntries = await stocks.find({ "batch_details.batchNumber": { $in: batch_numbers } });
+
+    if (!stockEntries.length) {
+      return res.status(404).json({ message: "No matching batch numbers found." });
+    }
+
+    for (const stock of stockEntries) {
+      for (const batch of stock.batch_details) {
+        if (batch_numbers.includes(batch.batchNumber)) {
+          if (batch.weight < requestedWeight) {
+            return res.status(400).json({
+              message: `Requested weight (${requestedWeight} kg) exceeds available stock weight (${batch.weight} kg) for batch ${batch.batchNumber}`,
+            });
+          }
+
+          // Reduce weight for the batch
+          await stocks.updateOne(
+            { "batch_details.batchNumber": batch.batchNumber },
+            { $inc: { "batch_details.$.weight": -requestedWeight } }
+          );
+        }
+      }
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Weight updated successfully.",
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("Internal Server Error");
+  }
+};
+
+
+
+
 
 exports.getstocksdataById = async (req, res) => {
   try {
@@ -351,7 +395,7 @@ exports.getStocks = async (req, res) => {
       },
     ]).exec();
 
-    console.log("Products", Products);
+
 
     if (Products.length === 0) {
       return res.status(404).json({
@@ -370,7 +414,6 @@ exports.getStocks = async (req, res) => {
       },
     });
 
-    console.log("matchingStocks", matchingStocks);
 
     if (matchingStocks.length > 0) {
       // Map over matchingStocks to include production_incharge for each product

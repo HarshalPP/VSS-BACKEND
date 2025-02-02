@@ -10,4 +10,5 @@ router.get('/getstocksdataById/:id', Production_Incahrge.getstocksdataById);
 router.patch('/editstocks/:batch_number',Production_Incahrge.editStocks)
 router.patch('/pickup', Production_Incahrge.pickup)
 router.patch('/assignDispatchManager/:id',Production_Incahrge.AssignOrder)
+router.post('/editbatch/:batch_number' ,Production_Incahrge.checkBatchWeight )
 module.exports=router
