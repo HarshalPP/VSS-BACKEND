@@ -148,7 +148,8 @@ exports.RecivedOrder = async (req, res) => {
     const dpRecieved = req.query.dpRecieved;
 
     // Check if the order is marked as 'Complete'
-    const order = await SalesManager.findOne({ orderId, Order_mark: 'Complete', TotalWeight, dpRecieved, current_date });
+    // const order = await SalesManager.findOne({ orderId, Order_mark: 'Complete', TotalWeight, dpRecieved, current_date });
+    const order = await SalesManager.findOne({ orderId, Order_mark: 'Complete'});
     console.log("Order Details with Order_Mark ", order)
     if (!order) {
       return res.status(400).json({
