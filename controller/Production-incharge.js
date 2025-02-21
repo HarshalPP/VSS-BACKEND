@@ -174,6 +174,13 @@ exports.checkBatchWeight = async (req, res) => {
     // Find stock entries that contain the given batch numbers
     const stockEntries = await stocks.find({ "batch_details.batchNumber": { $in: batch_numbers } });
 
+    const mapdata = stockEntries[0]?.batch_details.map(batch => {
+      return {
+        batchNumbers: batch.batchNumber, // Example: Adjust based on your actual structure
+        weights: batch.weight
+      };
+  });
+
     if (!stockEntries.length) {
       return res.status(404).json({ message: "No matching batch numbers found." });
     }
@@ -199,6 +206,7 @@ exports.checkBatchWeight = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: "Weight updated successfully.",
+      PreviousWeight:mapdata[0]?.weights || 0
     });
 
   } catch (error) {
@@ -206,6 +214,43 @@ exports.checkBatchWeight = async (req, res) => {
     return res.status(500).json("Internal Server Error");
   }
 };
+
+exports.getBatchWeight = async (req, res) => {
+  try {
+    const batch_numbers = req.params.batch_number.split(","); // Convert batch_number into an array
+
+    // Find stock entries containing the batch numbers
+    const stockEntries = await stocks.find({ "batch_details.batchNumber": { $in: batch_numbers } });
+
+    if (!stockEntries.length) {
+      return res.status(404).json({ message: "No matching batch numbers found." });
+    }
+
+    // Extract batch weights
+    let batchWeights = [];
+    stockEntries.forEach(stock => {
+      stock.batch_details.forEach(batch => {
+        if (batch_numbers.includes(batch.batchNumber)) {
+          batchWeights.push({
+            batchNumber: batch.batchNumber,
+            availableWeight: batch.weight
+          });
+        }
+      });
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: "Batch weight details fetched successfully.",
+      data: batchWeights
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 
 
 
