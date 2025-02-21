@@ -164,10 +164,10 @@ exports.get = async (req, res) => {
 
 exports.Newget = async (req, res) => {
   try {
-    const getData = await Mobilelogin.find({ Role: 'ProductionIncharge' });
+    const getData = await Mobilelogin.find({ Role: { $in: ['ProductionIncharge', 'Dispatchmanager'] } });
 
     if (!getData || getData.length === 0) {
-      console.error('❌ No data found for Role: ProductionIncharge');
+      console.error('❌ No data found for the specified roles.');
       return res.status(404).json({ error: 'No data found' });
     }
 
@@ -178,6 +178,7 @@ exports.Newget = async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
 
