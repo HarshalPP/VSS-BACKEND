@@ -950,6 +950,16 @@ exports.create = async (req, res) => {
           user.pdf_order.data = null;
       }
 
+      // Check if any product is GP Sheet, GC Sheet, or Profile Sheet
+const shouldMarkComplete = req.body.products.some(product =>
+  ["GP Sheet", "GC Sheet", "Profile Sheet"].includes(product.select_product)
+);
+
+// Update Order_mark accordingly
+if (shouldMarkComplete) {
+  user.Order_mark = "Complete";
+}
+
       // Set pdf_order data as the path to the saved PDF file
       user.pdf_order.data = pdfPath;
       
