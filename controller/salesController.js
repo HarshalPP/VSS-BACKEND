@@ -463,6 +463,7 @@ exports.create = async (req, res) => {
       await fs.mkdir(pdfDirectory, { recursive: true });
 
       const user = new salesorder({
+          user_id: req.body.user_id,
           clientName: req.body.clientName,
           firmName: req.body.firmName,
           address: req.body.address,
@@ -1025,7 +1026,7 @@ exports.availableStock = async (req, res) => {
     console.log("Filtered Data:", filteredData);
 
     // Check alternative products if filteredData is null
-    if (!filteredData && product === "GP Sheet") {
+    if (!filteredData && product == "GP Sheet") {
       console.log("Checking for GP Coil");
       filteredData = await stock.findOne({
         product: "GP Coil",
@@ -1036,11 +1037,11 @@ exports.availableStock = async (req, res) => {
         temper: temper,
         guardfilm: guardfilm,
         thickness: thickness,
-        width: width,
+        width: width
       });
     }
 
-    if (!filteredData && product === "Profile Sheet") {
+    if (!filteredData && product == "Profile Sheet") {
       console.log("Checking for Color Coil");
       filteredData = await stock.findOne({
         product: "Color Coil",

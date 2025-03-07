@@ -268,11 +268,23 @@ exports.EditOrder = async (req, res) => {
     const findsalesOrder = await SalesManager.findById(req.params.id);
     if (findsalesOrder) {
       const productioninchargeObjectId = mongoose.Types.ObjectId(req.body.productionincharge)
+      const dispatchManagerObjectId = mongoose.Types.ObjectId(req.body.dispatchManager)
+      if(productioninchargeObjectId){
       const updatesalesOrder = await SalesManager.findByIdAndUpdate(req.params.id, {
         $set: {
           productionincharge: productioninchargeObjectId
         }
       }, { new: true });
+
+    }
+    if(dispatchManagerObjectId){
+      const updatesalesOrder = await SalesManager.findByIdAndUpdate(req.params.id, {
+        $set: {
+          dispatchManager: dispatchManagerObjectId,
+          Order_mark:'Complete'
+        }
+      }, { new: true });
+    }
       // Use { new: true } to get the updated document as a result
 
       console.log(updatesalesOrder);

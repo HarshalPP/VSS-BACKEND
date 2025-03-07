@@ -236,6 +236,20 @@ const saleSchema = new Schema({
     }
   ],
 
+
+  dispatchManager:[
+    {
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'mobile'
+    }
+  ],
+
+
+  user_id:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'users'
+  },
+
   
   
   vehicleNum:
